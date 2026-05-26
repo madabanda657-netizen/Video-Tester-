@@ -1,270 +1,269 @@
-// =====================================================================
-// ===== VAST VIDEO AD — WATCH MENU (FIXED) =====
-// =====================================================================
-var vastAdsLoader = null;
-var vastAdsManager = null;
-var vastAdDisplayContainer = null;   // FIX 1: Was completely missing
-var vastAdTimeoutHandle = null;       // FIX 2: No timeout existed
-var VAST_AD_TIMEOUT_MS = 15000;       // 15 second timeout
-var VAST_TAG_URL = 'https://mellow-habit.com/dpmNFnz.d_GaNbvnZGGxUW/Ie/mC9Mu/ZUUxlPkgPDTrcBwoN/zQcHzkMODLU/tQNWzjAk3VNvztMgwXOFQk';
-
-function destroyVastAd() {
-  // Clear timeout
-  if (vastAdTimeoutHandle) {
-    clearTimeout(vastAdTimeoutHandle);
-    vastAdTimeoutHandle = null;
-  }
-  try {
-    if (vastAdsManager) {
-      vastAdsManager.destroy();
-      vastAdsManager = null;
-    }
-  } catch(e) { console.log('VAST destroy error:', e); }
-  vastAdsLoader = null;
-  vastAdDisplayContainer = null;
-  // Clean up video and container
-  try {
-    var videoEl = document.getElementById('vastVideo');
-    if (videoEl) { videoEl.pause(); videoEl.removeAttribute('src'); videoEl.load(); }
-  } catch(e) {}
-  try {
-    var adContainer = document.getElementById('vastAdContainer');
-    if (adContainer) adContainer.innerHTML = '';
-  } catch(e) {}
-}
-
-function initVastAd() {
-  destroyVastAd();
-
-  var videoEl = document.getElementById('vastVideo');
-  var adContainer = document.getElementById('vastAdContainer');
-
-  if (!videoEl || !adContainer) {
-    console.log('VAST: Missing video or container element');
-    window.vastAdCompleted = true;
-    checkVastAndCountdown();
-    return;
-  }
-
-  try {
-    if (typeof google === 'undefined' || !google.ima) {
-      console.log('VAST: IMA SDK not available');
-      window.vastAdCompleted = true;
-      checkVastAndCountdown();
-      return;
-    }
-
-    // FIX 3: Create AdDisplayContainer properly.
-    // The old code did: new google.ima.AdsLoader(adContainer)
-    // That passes a raw DOM element, which is WRONG.
-    // IMA requires: new google.ima.AdsLoader(adDisplayContainer)
-    // Without AdDisplayContainer, the ad loads but has nowhere to render,
-    // so it stays stuck at "Loading video..." forever.
-    vastAdDisplayContainer = new google.ima.AdDisplayContainer(
-      adContainer,  // div where ad renders
-      videoEl       // video element for linear ads
-    );
-
-    // FIX 4: Initialize the display container.
-    // This MUST be called from a user gesture (click/tap).
-    // Without this, mobile browsers block the ad from rendering.
-    // Since initVastAd() is called from watchOnclickaVideo()
-    // which is triggered by a button click, we are inside a
-    // user gesture context here.
-    vastAdDisplayContainer.initialize();
-
-    // FIX 5: Create AdsLoader with the AdDisplayContainer object
-    vastAdsLoader = new google.ima.AdsLoader(vastAdDisplayContainer);
-
-    vastAdsLoader.addEventListener(
-      google.ima.AdsManagerLoadedEvent.Type.ADS_MANAGER_LOADED,
-      onVastAdsManagerLoaded,
-      false
-    );
-    vastAdsLoader.addEventListener(
-      google.ima.AdErrorEvent.Type.AD_ERROR,
-      onVastAdLoaderError,
-      false
-    );
-
-    videoEl.load();
-
-    var adsRequest = new google.ima.AdsRequest();
-    adsRequest.adTagUrl = VAST_TAG_URL;
-
-    var containerWidth = adContainer.offsetWidth || 320;
-    var containerHeight = adContainer.offsetHeight || 180;
-    adsRequest.linearAdSlotWidth = containerWidth;
-    adsRequest.linearAdSlotHeight = containerHeight;
-    adsRequest.nonLinearAdSlotWidth = containerWidth;
-    adsRequest.nonLinearAdSlotHeight = Math.floor(containerHeight / 3);
-
-    // FIX 6: Tell IMA the ad will auto-play.
-    // Without these, Chrome/Firefox may block the ad from playing
-    // because their autoplay policies reject programmatic play() calls.
-    try {
-      adsRequest.setAdWillAutoPlay(true);
-      adsRequest.setAdWillPlayMuted(false);
-    } catch(e) {
-      console.log('VAST: setAdWillAutoPlay not supported', e);
-    }
-
-    vastAdsLoader.requestAds(adsRequest);
-
-    // FIX 7: Set a timeout — if the ad doesn't load within 15 seconds,
-    // something is wrong (network error, empty VAST, ad blocker, CORS).
-    // Without this, the player sits at "Loading" forever.
-    vastAdTimeoutHandle = setTimeout(function() {
-      console.log('VAST: Ad loading timed out after ' + (VAST_AD_TIMEOUT_MS / 1000) + 's');
-      var spinnerEl = document.getElementById('vastSpinner');
-      var statusEl = document.getElementById('onclickaAdStatus');
-      if (spinnerEl) spinnerEl.style.display = 'none';
-      if (statusEl) {
-        statusEl.className = 'ad-status watching';
-        statusEl.innerText = '⚠ Ad timed out. You can still claim reward!';
-      }
-      window.vastAdCompleted = true;
-      checkVastAndCountdown();
-    }, VAST_AD_TIMEOUT_MS);
-
-  } catch(e) {
-    console.log('VAST init error:', e);
-    window.vastAdCompleted = true;
-    checkVastAndCountdown();
-  }
-}
-
-function onVastAdsManagerLoaded(adsManagerLoadedEvent) {
-  // FIX 8: Clear the timeout — ad loaded successfully
-  if (vastAdTimeoutHandle) {
-    clearTimeout(vastAdTimeoutHandle);
-    vastAdTimeoutHandle = null;
-  }
-
-  var videoEl = document.getElementById('vastVideo');
-  var adContainer = document.getElementById('vastAdContainer');
-
-  if (!videoEl || !adContainer) {
-    window.vastAdCompleted = true;
-    checkVastAndCountdown();
-    return;
-  }
-
-  try {
-    var adsRenderingSettings = new google.ima.AdsRenderingSettings();
-    // FIX 9: Set to false (was true, which can cause issues)
-    adsRenderingSettings.restoreCustomPlaybackStateOnAdBreakCompletion = false;
-    adsRenderingSettings.enablePreloading = true;
-
-    vastAdsManager = adsManagerLoadedEvent.getAdsManager(videoEl, adsRenderingSettings);
-
-    // Add error listener on the manager too
-    vastAdsManager.addEventListener(google.ima.AdErrorEvent.Type.AD_ERROR, onVastAdManagerError);
-
-    vastAdsManager.addEventListener(google.ima.AdEvent.Type.LOADED, function() {
-      console.log('VAST: Ad LOADED');
-      var statusEl = document.getElementById('onclickaAdStatus');
-      var spinnerEl = document.getElementById('vastSpinner');
-      if (spinnerEl) spinnerEl.style.display = 'none';
-      if (statusEl) { statusEl.className = 'ad-status watching'; statusEl.innerText = '⏳ Video ad loaded, starting...'; }
-    });
-
-    vastAdsManager.addEventListener(google.ima.AdEvent.Type.STARTED, function() {
-      console.log('VAST: Ad STARTED playing');
-      var statusEl = document.getElementById('onclickaAdStatus');
-      var spinnerEl = document.getElementById('vastSpinner');
-      if (spinnerEl) spinnerEl.style.display = 'none';
-      if (statusEl) { statusEl.className = 'ad-status watching'; statusEl.innerText = '⏳ Video ad is playing...'; }
-    });
-
-    vastAdsManager.addEventListener(google.ima.AdEvent.Type.COMPLETE, function() {
-      console.log('VAST: Ad COMPLETE');
-      window.vastAdCompleted = true;
-      checkVastAndCountdown();
-    });
-
-    vastAdsManager.addEventListener(google.ima.AdEvent.Type.SKIPPED, function() {
-      console.log('VAST: Ad SKIPPED');
-      window.vastAdCompleted = true;
-      checkVastAndCountdown();
-    });
-
-    vastAdsManager.addEventListener(google.ima.AdEvent.Type.ALL_ADS_COMPLETED, function() {
-      console.log('VAST: ALL_ADS_COMPLETED');
-      window.vastAdCompleted = true;
-      checkVastAndCountdown();
-    });
-
-    vastAdsManager.addEventListener(google.ima.AdEvent.Type.IMPRESSION, function() {
-      console.log('VAST: Ad IMPRESSION fired');
-    });
-
-    // Initialize and start the ad
-    var containerWidth = adContainer.offsetWidth || 320;
-    var containerHeight = adContainer.offsetHeight || 180;
-    vastAdsManager.init(containerWidth, containerHeight, google.ima.ViewMode.NORMAL);
-    vastAdsManager.start();
-
-  } catch(e) {
-    console.log('VAST manager error:', e);
-    window.vastAdCompleted = true;
-    checkVastAndCountdown();
-  }
-}
-
-// FIX 10: Separate error handlers for loader vs manager
-function onVastAdLoaderError(adErrorEvent) {
-  // This fires when AdsLoader encounters an error
-  // (VAST parse error, network failure, empty response, ad blocker, CORS)
-  var error = adErrorEvent.getError();
-  var errorCode = error ? error.getErrorCode() : 'UNKNOWN';
-  var errorMessage = error ? error.getMessage() : 'Unknown error';
-  var vastErrorCode = (error && typeof error.getVastErrorCode === 'function') ? error.getVastErrorCode() : 'N/A';
-  console.log('VAST Loader Error [' + errorCode + '] VAST:' + vastErrorCode + ' — ' + errorMessage);
-
-  if (vastAdTimeoutHandle) {
-    clearTimeout(vastAdTimeoutHandle);
-    vastAdTimeoutHandle = null;
-  }
-
-  try { if (vastAdsManager) { vastAdsManager.destroy(); vastAdsManager = null; } } catch(e) {}
-
-  var spinnerEl = document.getElementById('vastSpinner');
-  if (spinnerEl) spinnerEl.style.display = 'none';
-
-  var statusEl = document.getElementById('onclickaAdStatus');
-  if (statusEl) {
-    statusEl.className = 'ad-status watching';
-    statusEl.innerText = '⚠ Ad unavailable. You can still claim reward!';
-  }
-
-  // Mark completed so user isn't stuck forever
-  window.vastAdCompleted = true;
-  checkVastAndCountdown();
-}
-
-function onVastAdManagerError(adErrorEvent) {
-  // This fires when AdsManager encounters an error during playback
-  var error = adErrorEvent.getError();
-  var errorMessage = error ? error.getMessage() : 'Unknown playback error';
-  console.log('VAST Manager Error: ' + errorMessage);
-
-  try { if (vastAdsManager) { vastAdsManager.destroy(); vastAdsManager = null; } } catch(e) {}
-
-  var spinnerEl = document.getElementById('vastSpinner');
-  if (spinnerEl) spinnerEl.style.display = 'none';
-
-  window.vastAdCompleted = true;
-  checkVastAndCountdown();
-}
-
-function checkVastAndCountdown() {
-  if (window.vastAdCompleted && window.vastCountdownDone) {
-    var numEl = document.getElementById('onclickaCountNum');
-    var statusEl = document.getElementById('onclickaAdStatus');
-    var claimBtn = document.getElementById('onclickaClaimBtn');
-    if (numEl) numEl.innerText = '✅';
-    if (statusEl) { statusEl.className = 'ad-status complete'; statusEl.innerText = '🎉 Video complete! Claim your reward!'; }
-    if (claimBtn) claimBtn.style.display = 'block';
-  }
-}
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Mada Game Earn</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="1b0828fe02a6ae6bde09b9dbc690f6792450a114" content="1b0828fe02a6ae6bde09b9dbc690f6792450a114" />
+<script src='//libtl.com/sdk.js' data-zone='9816593' data-sdk='show_9816593'></script>
+<script async="async" data-cfasync="false" src="https://pl29315230.effectivecpmnetwork.com/8dd30229fd7b7e3f3aeef1a7af787161/invoke.js"></script>
+<script src="https://imasdk.googleapis.com/js/sdkloader/ima3.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;background:#000;color:#fff;text-align:center;overflow-x:hidden}.container{padding:20px;max-width:600px;margin:0 auto;padding-bottom:80px}.card{background:#111;padding:20px;margin:15px 0;border-radius:15px;box-shadow:0 0 20px #00ffcc55;border:1px solid #00ffcc33}input,select,button{padding:12px;margin:8px 0;border-radius:10px;border:none;width:100%;font-size:16px}button{background:linear-gradient(45deg,#00ffcc,#00ccff);font-weight:bold;color:#000;cursor:pointer}h1{color:#00ffcc;margin-bottom:10px;font-size:28px}h2{color:#00ccff;margin-bottom:15px}h3{color:#00ccff;margin-bottom:10px}.success{color:#51cf66}.error{color:#ff6b6b}.nav{position:fixed;bottom:0;left:0;right:0;background:#111;display:none;justify-content:space-around;padding:12px 0;box-shadow:0 -2px 10px #00ffcc44;z-index:100}.nav-btn{background:transparent;border:1px solid transparent;color:#888;padding:8px 5px;margin:0;width:auto;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:4px}.nav-btn .nav-icon{font-size:20px}.nav-btn.active{color:#00ffcc;border-color:transparent;text-shadow:0 0 10px #00ffcc}.page{display:none}.page.active{display:block}.games-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:15px;margin:20px 0}.game-card{background:linear-gradient(135deg,#1a1a2e,#16213e);padding:20px;border-radius:15px;cursor:pointer;border:2px solid #00ffcc33}.game-icon{font-size:40px;margin-bottom:10px}.game-reward{color:#ffd700;font-weight:bold;margin-top:5px;font-size:13px}.game-area{min-height:300px;margin:20px 0}.memory-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:400px;margin:20px auto}.memory-card{aspect-ratio:1;background:linear-gradient(135deg,#00ffcc,#00ccff);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:32px;cursor:pointer}.memory-card.matched{opacity:.5;cursor:not-allowed}.color-options{display:grid;grid-template-columns:repeat(2,1fr));gap:15px;max-width:400px;margin:20px auto}.color-btn{padding:40px;border-radius:15px;font-size:18px;font-weight:bold}.stats-grid{display:grid;grid-template-columns:repeat(2,1fr));gap:15px;margin:20px 0}.stat-card{background:linear-gradient(135deg,#1a1a2e,#16213e);padding:15px;border-radius:10px;border:1px solid #00ffcc33}.stat-value{font-size:28px;font-weight:bold;color:#00ffcc;margin:10px 0}.stat-label{font-size:14px;color:#999}.timer{font-size:24px;font-weight:bold;color:#ffd700;margin:15px 0}.score-display{background:linear-gradient(135deg,#00ffcc22,#00ccff22);padding:15px;border-radius:10px;margin:15px 0;border:2px solid #00ffcc}.back-btn{background:#333;color:#00ffcc;width:auto;padding:10px 20px;margin:10px auto;display:block}.reward-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.97);z-index:9999;display:none;align-items:center;justify-content:center;flex-direction:column;padding:20px}.reward-box{background:#111;border:2px solid #00ffcc;border-radius:15px;padding:20px;max-width:500px;width:100%}.flex-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:14px;color:#ccc}.progress-container{background:#222;height:10px;border-radius:5px;overflow:hidden;margin:8px 0}.progress-fill{height:100%;background:linear-gradient(45deg,#00ffcc,#00ccff);transition:width 0.3s}
+@keyframes coinDrop { 0% { transform: scale(1); } 50% { transform: scale(1.2); color: #ffd700; } 100% { transform: scale(1); } }
+.coin-update { animation: coinDrop 0.5s ease; }
+.upload-label{display:block;background:linear-gradient(45deg,#9b59b6,#8e44ad);color:#fff;padding:14px;border-radius:10px;cursor:pointer;font-weight:bold;font-size:16px;margin:10px 0;transition:opacity 0.2s}.upload-label:hover{opacity:0.9}.upload-label:active{opacity:0.8}
+.upload-song-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#1a1a1a;border-radius:8px;margin:5px 0;border:1px solid #333;gap:8px}
+.upload-song-name{color:#ccc;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;text-align:left}
+.upload-song-btn{width:auto!important;padding:8px 14px!important;font-size:12px!important;margin:0!important;white-space:nowrap}
+.upload-song-earned{color:#51cf66;font-size:12px;white-space:nowrap}
+.upload-player-box{background:#0a0a0a;border-radius:12px;padding:15px;margin:12px 0;border:1px solid #9b59b644}
+.upload-player-box audio{width:100%;border-radius:8px;outline:none;height:40px}
+.upload-listen-bar{height:8px;border-radius:4px;overflow:hidden;margin-top:10px;background:#222}
+.upload-listen-fill{height:100%;background:linear-gradient(90deg,#9b59b6,#e74c3c);transition:width 1s linear;border-radius:4px}
+.upload-count-badge{display:inline-block;background:#9b59b6;color:#fff;font-size:12px;padding:4px 10px;border-radius:20px;margin-bottom:10px}
+.ad-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.94);z-index:99998;display:none;align-items:center;justify-content:center;flex-direction:column;padding:20px;backdrop-filter:blur(6px)}
+.ad-box{border-radius:22px;padding:30px 25px;text-align:center;max-width:340px;width:95%}
+.ad-box.onclicka-style{background:linear-gradient(145deg,#0d1a0d,#1a2e0a);border:2px solid #51cf66;box-shadow:0 0 50px #51cf6633,0 0 100px #51cf6611}
+.ad-box.monetag-style{background:linear-gradient(145deg,#0d0d1a,#1a0a2e);border:2px solid #9b59b6;box-shadow:0 0 50px #9b59b633,0 0 100px #9b59b611}
+.ad-icon{font-size:52px;margin-bottom:8px;animation:adPulse 1.5s ease-in-out infinite}
+@keyframes adPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+.ad-title{font-size:16px;font-weight:bold;color:#fff;margin-bottom:5px}
+.ad-number{font-size:80px;font-weight:bold;line-height:1;margin:8px 0}
+.ad-number.green{background:linear-gradient(135deg,#51cf66,#00ffcc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.ad-number.purple{background:linear-gradient(135deg,#9b59b6,#e74c3c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.ad-text{color:#bbb;font-size:14px;line-height:1.5;margin:6px 0}
+.ad-subtext{color:#666;font-size:12px;margin-top:4px}
+.ad-bar{height:10px;border-radius:5px;overflow:hidden;margin-top:18px;background:#1a1a1a;border:1px solid #333}
+.ad-fill-green{height:100%;background:linear-gradient(90deg,#51cf66,#00ffcc,#ffd700);border-radius:5px;transition:width 1s linear}
+.ad-fill-purple{height:100%;background:linear-gradient(90deg,#9b59b6,#e74c3c,#ffd700);border-radius:5px;transition:width 1s linear}
+.ad-status{margin-top:12px;padding:8px 14px;border-radius:8px;font-size:13px;display:none}
+.ad-status.watching{display:block;background:#51cf6622;border:1px solid #51cf6644;color:#ccc}
+.ad-status.complete{display:block;background:#51cf6622;border:1px solid #51cf6644;color:#51cf66}
+.ad-claim{display:none;margin-top:15px;background:linear-gradient(45deg,#51cf66,#00ffcc);color:#000;border:none;padding:15px 24px;border-radius:12px;font-weight:bold;font-size:16px;cursor:pointer;width:100%;animation:claimGlow 1s ease-in-out infinite alternate}
+@keyframes claimGlow{from{box-shadow:0 0 8px #51cf6666}to{box-shadow:0 0 25px #00ffcc88}}
+.double-coins-btn{background:linear-gradient(45deg,#9b59b6,#e74c3c)!important;color:#fff!important;font-size:15px!important;padding:14px!important;margin:10px 0!important;border:2px solid #ffd700!important;animation:doubleGlow 1.5s ease-in-out infinite alternate}
+@keyframes doubleGlow{from{box-shadow:0 0 5px #9b59b666}to{box-shadow:0 0 20px #e74c3c88}}
+.double-coins-btn:disabled{background:#333!important;color:#51cf66!important;border-color:#51cf66!important;animation:none!important;box-shadow:none!important;cursor:not-allowed!important}
+.watch-hero{background:linear-gradient(135deg,#51cf6622,#00ffcc22);border:2px solid #51cf66;border-radius:15px;padding:25px;margin:15px 0}
+.watch-hero-icon{font-size:60px;margin-bottom:10px;animation:adPulse 2s ease-in-out infinite}
+.watch-reward-badge{display:inline-block;background:linear-gradient(45deg,#ffd700,#ffaa00);color:#000;font-weight:bold;font-size:18px;padding:8px 20px;border-radius:25px;margin:10px 0}
+.watch-stat-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #222}
+.watch-stat-row:last-child{border-bottom:none}
+.watch-btn{background:linear-gradient(45deg,#51cf66,#00ffcc)!important;font-size:18px!important;padding:16px!important;margin:12px 0!important;border-radius:12px!important;position:relative;overflow:hidden}
+.watch-btn:disabled{background:#333!important;color:#888!important;cursor:not-allowed!important}
+.watch-btn::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:linear-gradient(transparent,rgba(255,255,255,0.1),transparent);transform:rotate(45deg);animation:watchBtnShine 3s ease-in-out infinite}
+@keyframes watchBtnShine{0%{transform:translateX(-100%) rotate(45deg)}100%{transform:translateX(100%) rotate(45deg)}}
+.vast-video-wrapper{position:relative;width:100%;max-width:340px;margin:0 auto 15px;background:#000;border-radius:12px;overflow:hidden;border:1px solid #51cf6644;min-height:180px}
+.vast-video-wrapper video{width:100%;height:180px;object-fit:cover;display:block;background:#000}
+#vastAdContainer{position:absolute;top:0;left:0;width:100%;height:100%;z-index:2}
+.vast-loading-spinner{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#51cf66;font-size:14px;z-index:1;pointer-events:none;background:rgba(0,0,0,0.8);padding:10px 20px;border-radius:20px}
+body.playing-game #id-custom-social-bar,body.playing-game [id^="adsterra"],body.playing-game [class*="social-bar"],body.playing-game [id^="bb"],body.playing-game iframe[src*="effectivecpmnetwork"],body.playing-game div[data-adid]{display:none!important;visibility:hidden!important}
+</style>
+<script>
+function logout(){if(confirm('Logout?')){localStorage.removeItem('user');localStorage.removeItem('displayName');document.getElementById('mainNav').style.display='none';document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('loginPage').classList.add('active');}}
+function showForgot(){document.getElementById('forgotBox').style.display=document.getElementById('forgotBox').style.display==='none'?'block':'none';}
+function resetPassword(){var email=document.getElementById('forgotEmail').value.trim();var newPass=document.getElementById('newPass').value;var msg=document.getElementById('forgotMsg');if(!email||newPass.length<6){msg.innerHTML='<span style="color:#ff6b6b">Enter valid email and password</span>';return;}if(!db){msg.innerHTML='<span style="color:#ff6b6b">Database not ready</span>';return;}db.ref('users').orderByChild('email').equalTo(email).once('value',function(snap){if(!snap.exists()){msg.innerHTML='<span style="color:#ff6b6b">Email not found</span>';return;}snap.forEach(function(child){var username=child.key;db.ref('users/'+username).update({password:md5(newPass)});msg.innerHTML='<span style="color:#51cf66">Password reset! Login with new password</span>';});});}
+</script>
+<script>
+var vastAdsLoader=null,vastAdsManager=null;
+function destroyVastAd(){try{if(vastAdsManager){vastAdsManager.destroy();vastAdsManager=null;}}catch(e){}vastAdsLoader=null;var adContainer=document.getElementById('vastAdContainer');if(adContainer)adContainer.innerHTML='';}
+function initVastAd(){console.log('VAST: Initializing...');destroyVastAd();var videoEl=document.getElementById('vastVideo');var adContainer=document.getElementById('vastAdContainer');var spinnerEl=document.getElementById('vastSpinner');if(!videoEl||!adContainer){console.log('VAST: Missing elements');window.vastAdCompleted=true;checkVastAndCountdown();return;}if(spinnerEl){spinnerEl.style.display='block';spinnerEl.innerText='Loading video...';}if(typeof google==='undefined'||!google.ima){console.log('VAST: IMA SDK not available');setTimeout(function(){window.vastAdCompleted=true;checkVastAndCountdown();},2000);return;}try{videoEl.muted=true;videoEl.setAttribute('muted','muted');videoEl.setAttribute('playsinline','playsinline');vastAdsLoader=new google.ima.AdsLoader(adContainer);vastAdsLoader.addEventListener(google.ima.AdsManagerLoadedEvent.Type.ADS_MANAGER_LOADED,onVastAdsManagerLoaded,false);vastAdsLoader.addEventListener(google.ima.AdErrorEvent.Type.AD_ERROR,onVastAdError,false);var adsRequest=new google.ima.AdsRequest();adsRequest.adTagUrl='https://mellow-habit.com/dpmNFnz.d_GaNbvnZGGxUW/Ie/mC9Mu/ZUUxlPkgPDTrcBwoN/zQcHzkMODLU/tQNWzjAk3VNvztMgwXOFQk';var containerWidth=adContainer.offsetWidth||320;var containerHeight=adContainer.offsetHeight||180;adsRequest.linearAdSlotWidth=containerWidth;adsRequest.linearAdSlotHeight=containerHeight;adsRequest.nonLinearAdSlotWidth=containerWidth;adsRequest.nonLinearAdSlotHeight=Math.floor(containerHeight/3);adsRequest.setAdWillAutoPlay(true);adsRequest.setAdWillPlayMuted(true);vastAdsLoader.requestAds(adsRequest);}catch(e){console.error('VAST: Init error:',e);window.vastAdCompleted=true;checkVastAndCountdown();}}
+function onVastAdsManagerLoaded(adsManagerLoadedEvent){console.log('VAST: Ads manager loaded');var videoEl=document.getElementById('vastVideo');var adContainer=document.getElementById('vastAdContainer');if(!videoEl||!adContainer){window.vastAdCompleted=true;checkVastAndCountdown();return;}try{var adsRenderingSettings=new google.ima.AdsRenderingSettings();adsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete=true;adsRenderingSettings.enablePreloading=true;vastAdsManager=adsManagerLoadedEvent.getAdsManager(videoEl,adsRenderingSettings);vastAdsManager.addEventListener(google.ima.AdEvent.Type.LOADED,function(adEvent){var spinnerEl=document.getElementById('vastSpinner');var statusEl=document.getElementById('onclickaAdStatus');if(spinnerEl)spinnerEl.style.display='none';if(statusEl){statusEl.className='ad-status watching';statusEl.innerText='Video ad is playing...';statusEl.style.display='block';}});vastAdsManager.addEventListener(google.ima.AdEvent.Type.STARTED,function(){var spinnerEl=document.getElementById('vastSpinner');var statusEl=document.getElementById('onclickaAdStatus');if(spinnerEl)spinnerEl.style.display='none';if(statusEl){statusEl.className='ad-status watching';statusEl.innerText='Video ad is playing...';statusEl.style.display='block';}});vastAdsManager.addEventListener(google.ima.AdEvent.Type.COMPLETE,function(){window.vastAdCompleted=true;checkVastAndCountdown();});vastAdsManager.addEventListener(google.ima.AdEvent.Type.SKIPPED,function(){window.vastAdCompleted=true;checkVastAndCountdown();});vastAdsManager.addEventListener(google.ima.AdErrorEvent.Type.AD_ERROR,function(){window.vastAdCompleted=true;checkVastAndCountdown();});vastAdsManager.addEventListener(google.ima.AdEvent.Type.ALL_ADS_COMPLETED,function(){window.vastAdCompleted=true;checkVastAndCountdown();});var containerWidth=adContainer.offsetWidth||320;var containerHeight=adContainer.offsetHeight||180;vastAdsManager.init(containerWidth,containerHeight,google.ima.ViewMode.NORMAL);vastAdsManager.start();}catch(e){window.vastAdCompleted=true;checkVastAndCountdown();}}
+function onVastAdError(adErrorEvent){var spinnerEl=document.getElementById('vastSpinner');if(spinnerEl)spinnerEl.style.display='none';window.vastAdCompleted=true;checkVastAndCountdown();}
+function checkVastAndCountdown(){var spinnerEl=document.getElementById('vastSpinner');if(spinnerEl)spinnerEl.style.display='none';if(window.vastAdCompleted&&window.vastCountdownDone){var numEl=document.getElementById('onclickaCountNum');var statusEl=document.getElementById('onclickaAdStatus');var claimBtn=document.getElementById('onclickaClaimBtn');if(numEl)numEl.innerText='';if(statusEl){statusEl.className='ad-status complete';statusEl.innerText='Video complete! Claim your reward!';statusEl.style.display='block';}if(claimBtn)claimBtn.style.display='block';}}
+var monetagCountdownInterval=null,monetagAdWatched=false,monetagCountdownDone=false;
+function triggerMonetagRewardedAd(){monetagAdWatched=false;monetagCountdownDone=false;var overlay=document.getElementById('monetagAdOverlay');if(!overlay){overlay=document.createElement('div');overlay.id='monetagAdOverlay';overlay.className='ad-overlay';overlay.innerHTML='<div class="ad-box monetag-style"><div class="ad-icon"></div><p class="ad-title">Watch the ad to unlock your song</p><div class="ad-number purple" id="monetagCountNum">15</div><p class="ad-text">Your song starts in <span id="monetagCountSec" style="color:#ffd700;font-weight:bold">15</span> seconds</p><p class="ad-subtext">Please watch the full ad</p><div class="ad-bar"><div class="ad-fill-purple" id="monetagCountFill" style="width:0%"></div></div><div class="ad-status watching" id="monetagAdStatus">Video ad is playing...</div><button class="ad-claim" id="monetagSkipBtn" onclick="monetagAdComplete()" style="background:linear-gradient(45deg,#9b59b6,#e74c3c)">Play Song Now</button></div>';document.body.appendChild(overlay);}var numEl=document.getElementById('monetagCountNum');var secEl=document.getElementById('monetagCountSec');var fillEl=document.getElementById('monetagCountFill');var statusEl=document.getElementById('monetagAdStatus');var skipBtn=document.getElementById('monetagSkipBtn');if(numEl)numEl.innerText='15';if(secEl)secEl.innerText='15';if(fillEl)fillEl.style.width='0%';if(skipBtn)skipBtn.style.display='none';if(statusEl){statusEl.className='ad-status watching';statusEl.innerText='Video ad is playing...';statusEl.style.display='block';}overlay.style.display='flex';try{if(typeof show_9816593==='function'){show_9816593().then(function(){monetagAdWatched=true;if(monetagCountdownDone)monetagStartMusic();}).catch(function(){monetagAdWatched=true;if(monetagCountdownDone)monetagStartMusic();});}else{setTimeout(function(){if(typeof show_9816593==='function'){show_9816593().then(function(){monetagAdWatched=true;if(monetagCountdownDone)monetagStartMusic();}).catch(function(){monetagAdWatched=true;if(monetagCountdownDone)monetagStartMusic();});}else{monetagAdWatched=true;if(monetagCountdownDone)monetagStartMusic();}},1000);}}catch(e){monetagAdWatched=true;if(monetagCountdownDone)monetagStartMusic();}var timeLeft=15;if(monetagCountdownInterval)clearInterval(monetagCountdownInterval);monetagCountdownInterval=setInterval(function(){timeLeft--;if(numEl)numEl.innerText=timeLeft;if(secEl)secEl.innerText=timeLeft;if(fillEl)fillEl.style.width=((15-timeLeft)/15*100)+'%';if(timeLeft<=0){clearInterval(monetagCountdownInterval);monetagCountdownInterval=null;monetagCountdownDone=true;if(monetagAdWatched){monetagStartMusic();}else{if(numEl)numEl.innerText='';}}},1000);}
+function monetagStartMusic(){var overlay=document.getElementById('monetagAdOverlay');if(overlay)overlay.style.display='none';if(monetagCountdownInterval){clearInterval(monetagCountdownInterval);monetagCountdownInterval=null;}startUploadedSongPlayback(pendingPlayIndex);}
+function monetagAdComplete(){monetagAdWatched=true;monetagCountdownDone=true;monetagStartMusic();}
+var onclickaCountInterval=null,ONCLICKA_DAILY_LIMIT=20,ONCLICKA_REWARD=50;
+function getOnclickaCount(){var today=new Date().toDateString();var savedDate='';try{savedDate=localStorage.getItem('onclickaDate')||'';}catch(e){}if(savedDate!==today){try{localStorage.setItem('onclickaDate',today);localStorage.setItem('onclickaCount','0');}catch(e){}return 0;}try{return parseInt(localStorage.getItem('onclickaCount')||'0');}catch(e){return 0;}}
+function incrementOnclickaCount(){var count=getOnclickaCount()+1;try{localStorage.setItem('onclickaCount',count.toString());}catch(e){}return count;}
+function updateWatchUI(){var count=getOnclickaCount();var remaining=ONCLICKA_DAILY_LIMIT-count;var progress=Math.min(100,(count/ONCLICKA_DAILY_LIMIT)*100);var countEl=document.getElementById('watchVideoCount');if(countEl)countEl.innerText=count;var remainEl=document.getElementById('watchVideoRemaining');if(remainEl)remainEl.innerText=remaining;var earnedEl=document.getElementById('watchVideoEarned');if(earnedEl)earnedEl.innerText=(count*ONCLICKA_REWARD);var mwkEl=document.getElementById('watchVideoMWK');if(mwkEl)mwkEl.innerText=Math.floor(count*ONCLICKA_REWARD*0.02);var barEl=document.getElementById('watchBar');if(barEl)barEl.style.width=progress+'%';var textEl=document.getElementById('watchText');if(textEl)textEl.innerText=count+' / '+ONCLICKA_DAILY_LIMIT+' videos today';var btnEl=document.getElementById('watchVideoBtn');if(btnEl){if(remaining<=0){btnEl.disabled=true;btnEl.innerText='Daily Limit Reached — Come Back Tomorrow!';}else{btnEl.disabled=false;btnEl.innerText='Watch Video — Earn '+ONCLICKA_REWARD+' Coins ('+remaining+' left today)';}}}
+function watchOnclickaVideo(){var user='';try{user=localStorage.getItem('user')||'';}catch(e){}if(!user){alert('Please login first!');return;}var count=getOnclickaCount();if(count>=ONCLICKA_DAILY_LIMIT){var msgEl=document.getElementById('watchMsg');if(msgEl)msgEl.innerHTML='<span style="color:#ff6b6b">Daily limit reached! Come back tomorrow.</span>';return;}var btnEl=document.getElementById('watchVideoBtn');if(btnEl){btnEl.disabled=true;btnEl.innerText='Loading ad...';}window.vastAdCompleted=false;window.vastCountdownDone=false;var overlay=document.getElementById('onclickaAdOverlay');if(!overlay){overlay=document.createElement('div');overlay.id='onclickaAdOverlay';overlay.className='ad-overlay';document.body.appendChild(overlay);}overlay.innerHTML='<div class="ad-box onclicka-style"><div class="vast-video-wrapper"><video id="vastVideo" playsinline muted autoplay loop poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"></video><div id="vastAdContainer"></div><div class="vast-loading-spinner" id="vastSpinner">Loading video...</div></div><p class="ad-title">Watch Video — Earn 50 Coins</p><div class="ad-number green" id="onclickaCountNum">10</div><p class="ad-text">Claim your reward in <span id="onclickaCountSec" style="color:#ffd700;font-weight:bold">10</span> seconds</p><p class="ad-subtext">+50 Coins after watching</p><div class="ad-bar"><div class="ad-fill-green" id="onclickaCountFill" style="width:0%"></div></div><div class="ad-status watching" id="onclickaAdStatus">Loading video ad...</div><button class="ad-claim" id="onclickaClaimBtn" onclick="claimOnclickaReward()">Claim +50 Coins!</button></div>';var numEl=document.getElementById('onclickaCountNum');var secEl=document.getElementById('onclickaCountSec');var fillEl=document.getElementById('onclickaCountFill');var statusEl=document.getElementById('onclickaAdStatus');var claimBtn=document.getElementById('onclickaClaimBtn');if(numEl)numEl.innerText='10';if(secEl)secEl.innerText='10';if(fillEl)fillEl.style.width='0%';if(claimBtn)claimBtn.style.display='none';if(statusEl){statusEl.className='ad-status watching';statusEl.innerText='Loading video ad...';statusEl.style.display='block';}overlay.style.display='flex';setTimeout(function(){initVastAd();},500);var timeLeft=10;if(onclickaCountInterval)clearInterval(onclickaCountInterval);onclickaCountInterval=setInterval(function(){timeLeft--;if(numEl)numEl.innerText=timeLeft;if(secEl)secEl.innerText=timeLeft;if(fillEl)fillEl.style.width=((10-timeLeft)/10*100)+'%';if(timeLeft<=0){clearInterval(onclickaCountInterval);onclickaCountInterval=null;window.vastCountdownDone=true;checkVastAndCountdown();}},1000);}
+function claimOnclickaReward(){destroyVastAd();var overlay=document.getElementById('onclickaAdOverlay');if(overlay)overlay.style.display='none';if(onclickaCountInterval){clearInterval(onclickaCountInterval);onclickaCountInterval=null;}addCoins(ONCLICKA_REWARD);var newCount=incrementOnclickaCount();var msgEl=document.getElementById('watchMsg');if(msgEl)msgEl.innerHTML='<span style="color:#51cf66">+'+ONCLICKA_REWARD+' coins earned! Video #'+newCount+' today.</span>';updateWatchUI();showBalance();setTimeout(function(){if(msgEl)msgEl.innerHTML='';},3000);}
+var lastBaseReward=0,doubleCoinsUsed=false;
+function doubleCoinsWithAd(){var doubleBtn=document.getElementById('doubleCoinsBtn');if(!doubleBtn||doubleBtn.disabled)return;doubleBtn.disabled=true;doubleBtn.innerText='Loading ad...';doubleBtn.style.background='#333';doubleBtn.style.color='#ffd700';try{if(typeof show_9816593==='function'){show_9816593().then(function(){addCoins(lastBaseReward);doubleCoinsUsed=true;doubleBtn.innerText='Coins Doubled! +'+lastBaseReward+' more!';doubleBtn.style.background='#333';doubleBtn.style.color='#51cf66';doubleBtn.style.borderColor='#51cf66';var totalEl=document.getElementById('gameTotalCoins');if(totalEl)totalEl.innerHTML='Total: +'+(lastBaseReward*2)+' Coins! (DOUBLED!)';var rewardEl=document.getElementById('gameRewardDisplay');if(rewardEl)rewardEl.innerHTML='<span style="color:#51cf66;font-size:20px">+'+(lastBaseReward*2)+' Coins! DOUBLED!</span>';showBalance();}).catch(function(){doubleBtn.innerText='Ad not completed. Try again!';doubleBtn.disabled=false;doubleBtn.style.background='linear-gradient(45deg,#9b59b6,#e74c3c)';doubleBtn.style.color='#fff';});}else{setTimeout(function(){if(typeof show_9816593==='function'){show_9816593().then(function(){addCoins(lastBaseReward);doubleCoinsUsed=true;doubleBtn.innerText='Coins Doubled! +'+lastBaseReward+' more!';doubleBtn.style.background='#333';doubleBtn.style.color='#51cf66';showBalance();}).catch(function(){doubleBtn.innerText='Ad not completed';doubleBtn.disabled=false;doubleBtn.style.background='linear-gradient(45deg,#9b59b6,#e74c3c)';doubleBtn.style.color='#fff';});}else{doubleBtn.innerText='Ad not available right now';doubleBtn.disabled=false;doubleBtn.style.background='linear-gradient(45deg,#9b59b6,#e74c3c)';doubleBtn.style.color='#fff';}},1000);}}catch(e){doubleBtn.innerText='Ad error. Try again.';doubleBtn.disabled=false;doubleBtn.style.background='linear-gradient(45deg,#9b59b6,#e74c3c)';doubleBtn.style.color='#fff';}}
+function setGameAdsVisible(visible){var nativeBannerAd=document.getElementById('nativeBannerAd');var topBannerAd=document.getElementById('topBannerAd');if(nativeBannerAd)nativeBannerAd.style.display=visible?'block':'none';if(topBannerAd)topBannerAd.style.display=visible?'block':'none';if(visible){document.body.classList.remove('playing-game');}else{document.body.classList.add('playing-game');}}
+</script>
+</head>
+<body>
+<div id="splashScreen" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:99999;overflow:hidden;transition:opacity 0.5s">
+<img src="https://i.imgur.com/VGTXXkQ.jpeg" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0">
+</div>
+<script>setTimeout(function(){var splash=document.getElementById('splashScreen');splash.style.opacity='0';setTimeout(function(){splash.style.display='none';},500);},2500);</script>
+<script src="https://pl29281398.effectivecpmnetwork.com/29/5a/a8/295aa8c04e3cb528d2b04a0d06b737fa.js"></script>
+<div class="container">
+<div id="topBannerAd" style="text-align:center;margin-bottom:15px;"><div id="container-8dd30229fd7b7e3f3aeef1a7af787161"></div></div>
+<div id="loginPage" class="page active">
+<img src="https://i.imgur.com/VGTXXkQ.jpeg" style="width:120px;height:auto;border-radius:15px;margin-bottom:10px;box-shadow:0 0 20px #00ffcc55">
+<h1>Mada Game Earn</h1>
+<div class="card"><h3>Create Account</h3><input type="text" id="usernameInput" placeholder="Username (min 3 chars)" maxlength="20"><input type="email" id="emailInput" placeholder="Email address"><input type="password" id="passwordInput" placeholder="Password (min 6 chars)"><div style="text-align:left;margin:10px 0;font-size:13px"><label><input type="checkbox" id="agreeCheck" style="width:auto;margin-right:8px">I agree to the Privacy Policy and Terms</label></div><div style="background:#222;padding:10px;border-radius:8px;margin:10px 0"><span id="captchaQ" style="color:#ffd700"></span> = <input type="number" id="captchaA" placeholder="?" style="width:80px;display:inline-block;margin:0"></div><button id="loginBtn" type="button" style="position:relative;z-index:10">Create Account & Play</button><p id="loginMsg" style="margin-top:10px;"></p><p style="margin-top:15px;font-size:12px;color:#888">Already have account? <a href="#" onclick="showLogin();return false" style="color:#00ffcc">Login</a></p><div id="forgotBox" style="display:none;margin-top:15px;padding:15px;background:#0a0a0a;border-radius:10px;border:1px solid #00ffcc33"><input type="email" id="forgotEmail" placeholder="Enter your email" style="margin-bottom:10px"><input type="password" id="newPass" placeholder="New password (min 6 chars)" style="margin-bottom:10px"><button onclick="resetPassword()" style="background:linear-gradient(45deg,#00ffcc,#00ccff);color:#000">Reset Password</button><p id="forgotMsg" style="margin-top:8px;font-size:12px"></p></div></div><p style="color:#999;margin-top:20px;">Malawi's #1 Play & Earn App • 18+ Only</p></div>
+<div id="walletPage" class="page">
+<div style="text-align:right;margin-bottom:10px"><button onclick="logout()" style="width:auto;padding:8px 15px;background:#333;color:#00ffcc;border:1px solid #00ffcc55">Logout</button></div>
+<h1>Wallet</h1>
+<div class="card"><h3>Balance</h3><p id="coins" style="font-size:24px;color:#ffd700;margin:10px 0;">0 Coins</p><p id="money" style="font-size:20px;color:#00ccff;">MWK 0</p></div>
+<div class="card"><h3>Earnings Dashboard</h3><div class="flex-row"><span>Play Game</span><span style="color:#00ffcc;font-weight:bold">+5-25 Coins</span></div><div class="flex-row"><span>Watch Video</span><span style="color:#51cf66;font-weight:bold">+50 Coins</span></div><div class="flex-row"><span>Listen & Earn</span><span style="color:#9b59b6;font-weight:bold">+50 Coins</span></div><div class="flex-row"><span>Daily Limit</span><span id="dailyLimitText" style="color:#ff6b6b">0/12000</span></div><div class="progress-container"><div class="progress-fill" id="dailyLimitBar" style="width:0%;background:linear-gradient(90deg,#ff6b6b,#ffd700)"></div></div><p style="margin-top:10px;font-size:13px;color:#888">Estimated Daily Profit: <span style="color:#51cf66">~240 MWK</span></p><p style="font-size:12px;color:#888">Daily Reset in: <span id="dailyCountdown" style="color:#fff;font-weight:bold">00:00:00</span></p></div>
+<div class="card"><h3>Next Withdrawal Goal</h3><p id="nextGoalText" style="color:#00ccff;margin-bottom:10px;">0 / 5,000 coins</p><div class="progress-container" style="height:12px"><div class="progress-fill" id="nextGoalBar" style="width:0%"></div></div><p id="nextGoalReward" style="font-size:12px;color:#888;margin-top:5px">Reach 5,000 to withdraw 100 MWK</p></div>
+<div class="stats-grid"><div class="stat-card"><div class="stat-label">Games Played</div><div class="stat-value" id="gamesPlayed">0</div></div><div class="stat-card"><div class="stat-label">Total Earned</div><div class="stat-value" id="totalEarned">0</div></div></div>
+<div class="card"><h3>Daily Bonus</h3><p style="color:#ccc">Claim 50 coins free every day!</p><button id="dailyBtn">Claim +50 Coins</button><p id="dailyMsg" style="margin-top:10px;"></p></div>
+<div class="card"><h3>Payment Method</h3><select id="network"><option>Airtel Money</option><option>TNM Mpamba</option></select><input type="text" id="number" placeholder="Enter phone number (099XXXXXXX)"><button id="saveBtn">Save Details (One-Time)</button><p id="saved" style="margin-top:10px;"></p></div>
+<div class="card"><h3>Withdraw</h3><select id="withdrawCoins"><option value="5000">5,000 Coins → 100 MWK</option><option value="10000">10,000 Coins → 200 MWK</option><option value="25000">25,000 Coins → 500 MWK</option><option value="50000">50,000 Coins → 1,000 MWK</option></select><button id="withdrawBtn">Request Withdrawal</button><div id="withdrawCountdown" style="text-align:center;margin-top:8px;font-size:12px;color:#aaa"></div><p id="msg" style="margin-top:10px;"></p></div>
+<div class="card"><h3>My Withdrawals</h3><div id="myWithdrawals" style="text-align:left;max-height:220px;overflow-y:auto"></div></div>
+<div class="card"><h3>Withdrawal Rules</h3><p style="text-align:left;line-height:1.8;color:#ccc;">5,000 Coins = 100 MWK<br>10,000 Coins = 200 MWK<br>25,000 Coins = 500 MWK<br>50,000 Coins = 1,000 MWK<br><br>Fake activity = Permanent ban<br><strong style='color:#ffd700'>Withdrawals: Fridays 6PM-9PM ONLY</strong><br>Processing: Within 24 hours</p></div>
+</div>
+<div id="gamesPage" class="page"><h1>Play & Earn</h1><div class="card"><p style="color:#00ffcc;margin-bottom:10px;">Play games to earn coins!</p><p style="color:#9b59b6;margin-bottom:20px;font-size:14px;">Watch ad after game to DOUBLE your reward!</p><div class="games-grid" id="gamesGrid"></div></div></div>
+<div id="leaderboardPage" class="page">
+<h1 style="color:#00ffcc;margin:5px 0">Leaderboard</h1>
+<p style="color:#999;margin-bottom:15px;font-size:14px">Malawi's Top Earners</p>
+<div style="display:flex;gap:8px;margin-bottom:15px">
+<button onclick="setView('daily')" id="btnDaily" style="flex:1;padding:10px;background:#00ffcc;color:#000;border:none;border-radius:8px;font-weight:bold">Daily</button>
+<button onclick="setView('weekly')" id="btnWeekly" style="flex:1;padding:10px;background:#333;color:#00ffcc;border:2px solid #00ffcc;border-radius:8px">Weekly</button>
+<button onclick="setView('all')" id="btnAll" style="flex:1;padding:10px;background:#333;color:#00ffcc;border:2px solid #00ffcc;border-radius:8px">All-Time</button>
+</div>
+<div id="myRank" style="background:linear-gradient(135deg,#111,#1a1a2e);border:1px solid #00ffcc55;padding:14px;border-radius:12px;margin-bottom:15px"></div>
+<button onclick="shareRank()" style="width:100%;padding:12px;background:linear-gradient(45deg,#ffd700,#ffaa00);color:#000;border:none;border-radius:10px;font-weight:bold;margin-bottom:15px">Share My Rank</button>
+<div id="board" style="text-align:left"></div>
+<p style="color:#555;margin-top:20px;font-size:11px">Auto-updates every 10s • Online = green dot</p>
+</div>
+<div id="watchPage" class="page">
+<h1>Watch & Earn</h1>
+<div class="watch-hero">
+<div class="watch-hero-icon"></div>
+<h2 style="color:#fff;margin-bottom:5px">Watch Video Ads</h2>
+<div class="watch-reward-badge">+50 Coins Per Video</div>
+<p style="color:#ccc;margin-top:10px;font-size:14px">Watch short video ads and earn coins instantly!</p>
+<button id="watchVideoBtn" class="watch-btn" onclick="watchOnclickaVideo()">Watch Video — Earn 50 Coins (20 left today)</button>
+<p id="watchMsg" style="margin-top:10px;font-size:14px;height:20px"></p>
+</div>
+<div class="card">
+<h3>Today's Progress</h3>
+<div class="progress-container" style="height:14px;margin:15px 0"><div class="progress-fill" id="watchBar" style="width:0%"></div></div>
+<p id="watchText" style="margin:8px 0;color:#00ccff;font-size:15px">0 / 20 videos today</p>
+<div style="margin-top:15px">
+<div class="watch-stat-row"><span style="color:#ccc">Videos Watched</span><span style="color:#51cf66;font-weight:bold" id="watchVideoCount">0</span></div>
+<div class="watch-stat-row"><span style="color:#ccc">Remaining Today</span><span style="color:#ffd700;font-weight:bold" id="watchVideoRemaining">20</span></div>
+<div class="watch-stat-row"><span style="color:#ccc">Coins Earned</span><span style="color:#51cf66;font-weight:bold" id="watchVideoEarned">0</span></div>
+<div class="watch-stat-row"><span style="color:#ccc">Estimated MWK</span><span style="color:#00ccff;font-weight:bold" id="watchVideoMWK">0</span></div>
+</div>
+</div>
+<div class="card">
+<h3>How It Works</h3>
+<p style="text-align:left;color:#ccc;line-height:1.8;font-size:14px">
+1. Tap the "Watch Video" button<br>
+2. A video ad will play in the player<br>
+3. Wait for the countdown to finish<br>
+4. Tap "Claim +50 Coins"<br>
+5. Coins are added to your wallet instantly!<br><br>
+You can watch up to 20 videos per day<br>
+That's up to 1,000 coins daily from videos!
+</p>
+</div>
+</div>
+<div id="listenPage" class="page">
+<h1>Listen & Earn</h1>
+<div class="card" style="background:linear-gradient(135deg,#1a1a2e,#16213e);border:2px solid #9b59b6">
+<h3 style="color:#9b59b6">Upload Your Music</h3>
+<p style="color:#ccc;margin:10px 0;">Upload songs from your device, listen for 60s, earn <span style="color:#ffd700;font-weight:bold">50 coins</span> each!</p>
+<span class="upload-count-badge" id="uploadCountBadge">0 songs earned today</span>
+<label for="musicFileInput" class="upload-label">Choose Music Files</label>
+<input type="file" id="musicFileInput" accept="audio/*" multiple style="display:none">
+<div id="uploadedMusicList" style="margin:10px 0;max-height:260px;overflow-y:auto">
+<p style="color:#555;text-align:center;padding:15px;font-size:14px">No songs uploaded yet</p>
+</div>
+<div id="customAudioPlayer" style="display:none" class="upload-player-box">
+<p id="uploadedSongName" style="color:#9b59b6;font-weight:bold;margin-bottom:10px;font-size:15px"></p>
+<audio id="uploadedAudio" controls></audio>
+<div class="upload-listen-bar"><div class="upload-listen-fill" id="uploadListenBar" style="width:0%"></div></div>
+<p id="uploadListenTimer" style="margin-top:8px;font-size:15px;color:#ffd700;height:20px"></p>
+<p id="uploadListenMsg" style="margin-top:6px;font-size:13px;height:18px"></p>
+</div>
+<div style="margin-top:15px;border-top:1px solid #222;padding-top:12px;text-align:left">
+<h3 style="color:#9b59b6;font-size:14px">How It Works</h3>
+<p style="color:#ccc;line-height:1.8;font-size:13px">1. Tap "Choose Music Files" to upload songs<br>2. Press Play on any song in the list<br>3. A video ad will play first<br>4. Wait for the countdown to finish<br>5. Song starts playing — listen for 60 seconds!<br>6. +50 coins added to your balance automatically!</p>
+</div>
+</div>
+</div>
+<div id="inboxPage" class="page">
+<h1>Support Inbox</h1>
+<div class="card" style="text-align:left;max-height:380px;overflow-y:auto;padding:12px;background:#0a0a0a" id="adminChatBox"><div style="color:#666;text-align:center;padding:30px">No messages</div></div>
+<div class="card"><input type="text" id="playerReply" placeholder="Reply to Admin..." style="margin-bottom:8px"><button id="replyBtn">Send Reply</button><p id="replyStatus" style="margin-top:8px;font-size:12px;height:16px"></p></div>
+</div>
+<div id="playPage" class="page"><button class="back-btn" id="backBtn">Back to Games</button><h2 id="gameTitle"></h2><div class="card"><div id="gameArea" class="game-area"></div></div></div>
+<div id="nativeBannerAd" style="text-align:center;margin:15px 0;padding-bottom:10px;">
+<script>atOptions={'key':'ad1f2717ce15725e76c4ffc1d25e948e','format':'iframe','height':250,'width':300,'params':{}};</script>
+<script src="https://www.highperformanceformat.com/ad1f2717ce15725e76c4ffc1d25e948e/invoke.js"></script>
+</div>
+</div>
+<div class="nav" id="mainNav">
+<button class="nav-btn active" id="navWallet"><span class="nav-icon"></span>Wallet</button>
+<button class="nav-btn" id="navGames"><span class="nav-icon"></span>Games</button>
+<button class="nav-btn" id="navBoard"><span class="nav-icon"></span>Board</button>
+<button class="nav-btn" id="navWatch"><span class="nav-icon"></span>Watch</button>
+<button class="nav-btn" id="navListen"><span class="nav-icon"></span>Listen</button>
+<button class="nav-btn" id="navInbox" style="position:relative"><span class="nav-icon"></span>Inbox<span id="inboxDot" style="display:none;position:absolute;top:6px;right:10px;width:8px;height:8px;background:#ff4444;border-radius:50%"></span></button>
+</div>
+<script>
+var db=null;
+try{if(typeof firebase!=='undefined'&&firebase.apps&&firebase.apps.length===0){firebase.initializeApp({apiKey:"AIzaSyBRDfT-P8wzVAAZs8lveF1-ZTf8QlpRC5g",authDomain:"apple-green-ded09.firebaseapp.com",databaseURL:"https://apple-green-ded09-default-rtdb.firebaseio.com",projectId:"apple-green-ded09",storageBucket:"apple-green-ded09.firebasestorage.app",messagingSenderId:"1093712798003",appId:"1:1093712798003:web:2a945cd7fc76641dab5e46"});db=firebase.database();}}catch(e){db=null;}
+var DAILY_LIMIT=12000,currentGame=null,gameState={},countdownInterval=null,captchaAnswer=0;
+function generateCaptcha(){var a=Math.floor(Math.random()*10)+1;var b=Math.floor(Math.random()*10)+1;captchaAnswer=a+b;var el=document.getElementById('captchaQ');if(el)el.innerText=a+' + '+b;}
+function register(){try{var user=(document.getElementById("usernameInput").value||"").trim();var email=(document.getElementById("emailInput").value||"").trim();var pass=document.getElementById("passwordInput").value||"";var agree=document.getElementById("agreeCheck").checked;var captcha=parseInt(document.getElementById("captchaA").value);var msgEl=document.getElementById("loginMsg");if(user.length<3){msgEl.innerHTML='<span class="error">Username min 3 chars</span>';return;}if(!email.includes('@')){msgEl.innerHTML='<span class="error">Valid email required</span>';return;}if(pass.length<6){msgEl.innerHTML='<span class="error">Password min 6 chars</span>';return;}if(!agree){msgEl.innerHTML='<span class="error">You must agree to Privacy Policy</span>';return;}if(captcha!==captchaAnswer){msgEl.innerHTML='<span class="error">Wrong captcha</span>';generateCaptcha();return;}msgEl.innerHTML='<span class="success">Creating account...</span>';var name=user.replace(/\s+/g,'_').replace(/[.#$\[\]]/g,'');try{localStorage.setItem("user",name);localStorage.setItem("displayName",user);localStorage.setItem("userEmail",email);}catch(e){}document.getElementById("loginPage").classList.remove("active");document.getElementById("mainNav").style.display="flex";showPage('wallet');setTimeout(function(){if(!db)return;db.ref('users/'+name).set({email:email,created:Date.now(),country:"MW",agreed:true,password:md5(pass)});db.ref('leaderboard_all/'+name).once('value').then(function(snap){if(!snap.exists()){db.ref('leaderboard_all/'+name).set({coins:0,score:0,gamesPlayed:0,country:"MW",banned:false,lastPlayed:Date.now(),displayName:user,email:email});}});setupPresence(name);checkInboxBadge();},200);}catch(e){alert("Error: "+e.message);}}
+function showLogin(){document.getElementById("emailInput").style.display="none";document.getElementById("passwordInput").placeholder="Password";document.getElementById("loginBtn").innerText="Login";document.getElementById("loginBtn").onclick=login;document.querySelector('#loginPage h3').innerText='Login';}
+function login(){try{var input=document.getElementById("usernameInput");var rawName=(input&&input.value||"").trim();var pass=document.getElementById("passwordInput").value;var msgEl=document.getElementById("loginMsg");var captcha=parseInt(document.getElementById("captchaA").value);if(captcha!==captchaAnswer){msgEl.innerHTML='<span class="error">Wrong captcha</span>';generateCaptcha();return;}if(!rawName||!pass){msgEl.innerHTML='<span class="error">Enter username and password</span>';return;}var name=rawName.replace(/\s+/g,'_').replace(/[.#$\[\]]/g,'');msgEl.innerHTML='<span class="success">Checking...</span>';if(!db){msgEl.innerHTML='<span class="error">Database error</span>';return;}db.ref('users/'+name).once('value',function(snap){var data=snap.val();if(!data){msgEl.innerHTML='<span class="error">User not found</span>';return;}if(data.password!==md5(pass)){msgEl.innerHTML='<span class="error">Wrong password</span>';return;}localStorage.setItem("user",name);localStorage.setItem("displayName",rawName);document.getElementById("loginPage").classList.remove("active");document.getElementById("mainNav").style.display="flex";showPage('wallet');setupPresence(name);checkInboxBadge();});}catch(e){alert(e.message);}}
+function handleGameEnd(baseCoins,title,detailsHtml,replayFnName){addCoins(baseCoins);lastBaseReward=baseCoins;doubleCoinsUsed=false;document.getElementById('gameArea').innerHTML='<div class="score-display"><h2>'+title+'</h2>'+detailsHtml+'<p id="gameRewardDisplay" style="font-size:24px;color:#ffd700;margin:10px 0;">+'+baseCoins+' Coins!</p><button id="doubleCoinsBtn" class="double-coins-btn" onclick="doubleCoinsWithAd()">Watch Ad to Double Coins (+'+baseCoins+' more!)</button><p id="gameTotalCoins" style="font-size:13px;color:#999;margin:5px 0"></p><button id="replayBtn">Play Again</button></div>';var rb=document.getElementById("replayBtn");if(rb)rb.onclick=function(){window[replayFnName]();};}
+function showPage(page){try{var pages=document.querySelectorAll('.page');for(var i=0;i<pages.length;i++)pages[i].classList.remove('active');var btns=document.querySelectorAll('.nav-btn');for(var j=0;j<btns.length;j++)btns[j].classList.remove('active');var mainNav=document.getElementById('mainNav');if(mainNav)mainNav.style.display='flex';setGameAdsVisible(page!=='play');if(page==='wallet'){document.getElementById('walletPage').classList.add('active');if(btns[0])btns[0].classList.add('active');showBalance();startCountdown();}else if(page==='games'){document.getElementById('gamesPage').classList.add('active');if(btns[1])btns[1].classList.add('active');if(countdownInterval)clearInterval(countdownInterval);}else if(page==='leaderboard'){document.getElementById('leaderboardPage').classList.add('active');if(btns[2])btns[2].classList.add('active');if(countdownInterval)clearInterval(countdownInterval);if(typeof setView==='function')setView(currentLeaderboardView||'daily');}else if(page==='watch'){document.getElementById('watchPage').classList.add('active');if(btns[3])btns[3].classList.add('active');if(countdownInterval)clearInterval(countdownInterval);updateWatchUI();}else if(page==='listen'){document.getElementById('listenPage').classList.add('active');if(btns[4])btns[4].classList.add('active');if(countdownInterval)clearInterval(countdownInterval);renderUploadedSongs();}else if(page==='inbox'){document.getElementById('inboxPage').classList.add('active');if(btns[5])btns[5].classList.add('active');loadPlayerInbox();if(countdownInterval)clearInterval(countdownInterval);}}catch(e){}}
+function startCountdown(){if(countdownInterval)clearInterval(countdownInterval);function update(){var now=new Date();var midnight=new Date(now);midnight.setHours(24,0,0,0);var diff=midnight-now;var h=Math.floor(diff/3600000);var m=Math.floor((diff%3600000)/60000);var s=Math.floor((diff%60000)/1000);var el=document.getElementById("dailyCountdown");if(el)el.innerText=String(h).padStart(2,'0')+":"+String(m).padStart(2,'0')+":"+String(s).padStart(2,'0');}update();countdownInterval=setInterval(update,1000);}
+var lastKnownBalance=-1;
+function startRealtimeBalance(){var user;try{user=localStorage.getItem("user");}catch(e){user=null;}if(!user||!db)return;db.ref('leaderboard_all/'+user+'/coins').on('value',function(snap){var coins=snap.val()||0;if(lastKnownBalance!==-1&&coins>lastKnownBalance){var coinsEl=document.getElementById("coins");if(coinsEl){coinsEl.innerHTML=coins+" Coins";coinsEl.classList.remove('coin-update');void coinsEl.offsetWidth;coinsEl.classList.add('coin-update');}var moneyEl=document.getElementById("money");if(moneyEl)moneyEl.innerHTML="MWK "+Math.floor(coins*0.02);var daily=0;try{daily=parseInt(localStorage.getItem("dailyCoins")||0);}catch(e){}document.getElementById("dailyLimitText").innerText=daily+"/12000";document.getElementById("dailyLimitBar").style.width=(daily/12000*100)+"%";}lastKnownBalance=coins;});}
+function showBalance(){try{var user;try{user=localStorage.getItem("user");}catch(e){user="Guest";}if(!db){document.getElementById("coins").innerHTML="0 Coins";document.getElementById("money").innerHTML="MWK 0";return;}db.ref('leaderboard_all/'+user).once('value',function(snap){var d=snap.val()||{};var coins=d.coins||0;var gp=d.gamesPlayed||0;try{localStorage.setItem("coins",coins);}catch(e){}lastKnownBalance=coins;document.getElementById("coins").innerHTML=coins+" Coins";document.getElementById("money").innerHTML="MWK "+Math.floor(coins*0.02);document.getElementById("gamesPlayed").innerHTML=gp;document.getElementById("totalEarned").innerHTML=coins;var daily=0;try{daily=parseInt(localStorage.getItem("dailyCoins")||0);}catch(e){}document.getElementById("dailyLimitText").innerText=daily+"/12000";document.getElementById("dailyLimitBar").style.width=(daily/12000*100)+"%";var tiers=[5000,10000,25000,50000];var rewards=[100,200,500,1000];var nextIdx=tiers.findIndex(t=>coins<t);if(nextIdx===-1)nextIdx=tiers.length-1;var goalTarget=tiers[nextIdx];var prevTarget=nextIdx>0?tiers[nextIdx-1]:0;var progressInTier=coins-prevTarget;var tierSize=goalTarget-prevTarget;var percent=Math.min(100,(progressInTier/tierSize)*100);document.getElementById("nextGoalText").innerText=coins+" / "+goalTarget+" coins";document.getElementById("nextGoalBar").style.width=percent+"%";document.getElementById("nextGoalReward").innerText="Reach "+goalTarget+" to withdraw "+rewards[nextIdx]+" MWK";});loadMyWithdrawals();}catch(e){}}
+function addCoins(amount){try{var user;try{user=localStorage.getItem("user");}catch(e){user="Guest";}var daily=0;try{daily=parseInt(localStorage.getItem("dailyCoins")||0);}catch(e){}var canEarn=Math.max(0,DAILY_LIMIT-daily);var give=Math.min(amount,canEarn);if(give<=0){alert("Daily limit reached (12,000 coins). Come back tomorrow!");return;}if(!db)return;db.ref('leaderboard_all/'+user).once('value',function(snap){var d=snap.val()||{};if(d.banned===true){alert("Account suspended. You cannot earn coins.");return;}var coins=(d.coins||0)+give;var gp=(d.gamesPlayed||0)+1;db.ref('leaderboard_all/'+user).update({coins:coins,gamesPlayed:gp,score:coins,lastPlayed:Date.now(),country:"MW"});daily+=give;try{localStorage.setItem("dailyCoins",daily);}catch(e){}showBalance();});}catch(e){}}
+function setupPresence(u){try{if(!u||!db)return;var p=db.ref('presence/'+u);db.ref('.info/connected').on('value',function(s){if(s.val()){p.onDisconnect().set({state:'offline',last:Date.now()});p.set({state:'online',last:Date.now()});db.ref('leaderboard_all/'+u+'/lastPlayed').set(Date.now());}});}catch(e){}}
+function loadPlayerInbox(){try{var u;try{u=localStorage.getItem("user");}catch(e){u=null;}if(!u||!db)return;var id=['Admin_Mada',u].sort().join('_');db.ref('chats/'+id+'/messages').orderByChild('timestamp').limitToLast(50).on('value',function(s){var h='';s.forEach(function(c){var m=c.val();var mine=m.from===u;var t=new Date(m.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});h+='<div style="margin:6px 0;display:flex;justify-content:'+(mine?'flex-end':'flex-start')+'"><div style="max-width:80%;background:'+(mine?'#003d33':'#1a1a1a')+';padding:8px 10px;border-radius:10px"><div style="font-size:13px;color:#fff;word-break:break-word">'+String(m.text||'').replace(/</g,'&lt;')+'</div><div style="font-size:10px;color:#888;margin-top:2px;text-align:right">'+t+'</div></div></div></div>';if(m.to===u&&m.status!=='read')db.ref('chats/'+id+'/messages/'+c.key+'/status').set('read');});document.getElementById('adminChatBox').innerHTML=h||'<div style="color:#666;text-align:center;padding:30px">No messages</div>';document.getElementById('adminChatBox').scrollTop=document.getElementById('adminChatBox').scrollHeight;});}catch(e){}}
+function checkInboxBadge(){try{var u;try{u=localStorage.getItem("user");}catch(e){u=null;}if(!u||!db)return;var id=['Admin_Mada',u].sort().join('_');db.ref('chats/'+id+'/messages').on('value',function(s){var un=0;s.forEach(function(c){var v=c.val();if(v.to===u&&v.status!=='read')un++;});document.getElementById("inboxDot").style.display=un>0?'block':'none';});}catch(e){}}
+function saveDetails(){try{var user;try{user=localStorage.getItem("user");}catch(e){user="Guest";}var net=document.getElementById("network").value;var num=document.getElementById("number").value;if(!num){alert("Please enter your phone number");return;}if(!db)return;db.ref('users/'+user+'/phone').once('value',function(s){if(s.val()){alert("Phone already saved");document.getElementById("number").value=s.val();document.getElementById("number").disabled=true;return;}db.ref('users/'+user).update({phone:num,network:net});try{localStorage.setItem("network",net);localStorage.setItem("number",num);}catch(e){}document.getElementById("saved").innerHTML='<span style="color:#51cf66">Saved: '+net+' - '+num+' (Locked)</span>';document.getElementById("number").disabled=true;document.getElementById("network").disabled=true;document.getElementById("saveBtn").disabled=true;document.getElementById("saveBtn").innerText="Locked";});}catch(e){}}
+function claimDailyBonus(){try{var user;try{user=localStorage.getItem("user");}catch(e){user=null;}if(!user){alert("Login first");return;}if(!db){document.getElementById("dailyMsg").innerHTML='<span style="color:#ff6b6b">Database not ready</span>';return;}var today=new Date().toDateString();var msgEl=document.getElementById("dailyMsg");msgEl.innerHTML='<span style="color:#ffd700">Checking...</span>';db.ref('users/'+user+'/lastDaily').once('value',function(snap){if(snap.val()===today){msgEl.innerHTML='<span style="color:#ff6b6b">Already claimed today</span>';return;}db.ref('users/'+user).update({lastDaily:today},function(error){if(error){msgEl.innerHTML='<span style="color:#ff6b6b">Error saving. Try again.</span>';return;}db.ref('leaderboard_all/'+user).once('value',function(leaderSnap){var data=leaderSnap.val()||{};var coins=(data.coins||0)+50;db.ref('leaderboard_all/'+user).update({coins:coins,score:coins,lastPlayed:Date.now()},function(error2){if(error2){msgEl.innerHTML='<span style="color:#ff6b6b">Error adding coins</span>';return;}msgEl.innerHTML='<span style="color:#51cf66">+50 coins added!</span>';showBalance();});});});});}catch(e){document.getElementById("dailyMsg").innerHTML='<span style="color:#ff6b6b">Error: '+e.message+'</span>';}}
+try{var todayStr=new Date().toDateString();var lastDateStr="";try{lastDateStr=localStorage.getItem("lastDate")||"";}catch(e){}if(lastDateStr!==todayStr){try{localStorage.setItem("dailyCoins","0");localStorage.setItem("lastDate",todayStr);localStorage.setItem("watchCount","0");localStorage.setItem("rewardedSongs","[]");}catch(e){}}}catch(e){}
+function withdraw(){try{var now=new Date();var malawiOffset=2*60;var utc=now.getTime()+(now.getTimezoneOffset()*60000);var malawiTime=new Date(utc+(malawiOffset*60000));var day=malawiTime.getDay();var hour=malawiTime.getHours();if(day!==5||hour<18||hour>=21){document.getElementById("msg").innerHTML='<span style="color:#ff6b6b">Withdrawals only Fridays 6PM-9PM (Malawi time).</span>';return;}var user;try{user=localStorage.getItem("user");}catch(e){user="Guest";}if(!db)return;db.ref('leaderboard_all/'+user).once('value',function(snap){var d=snap.val()||{};if(d.banned===true){document.getElementById("msg").innerHTML='<span style="color:#ff6b6b">Account banned</span>';return;}var coins=d.coins||0;var req=parseInt(document.getElementById("withdrawCoins").value);var net="";try{net=localStorage.getItem("network");}catch(e){}var num="";try{num=localStorage.getItem("number");}catch(e){}if(!net||!num){document.getElementById("msg").innerHTML='<span style="color:#ff6b6b">Save payment details first</span>';return;}if(req>coins){document.getElementById("msg").innerHTML='<span style="color:#ff6b6b">Insufficient balance</span>';return;}var money=Math.floor(req*0.02);var wid=Date.now();db.ref('withdrawals').orderByChild('user').equalTo(user).once('value',function(ws){var pending=false;ws.forEach(function(w){if(w.val().status==='Pending')pending=true;});if(pending){document.getElementById("msg").innerHTML='<span style="color:#ff6b6b">Pending withdrawal exists</span>';return;}db.ref("withdrawals/"+wid).set({user:user,coins:req,money:money,network:net,phone:num,status:"Pending",date:new Date().toLocaleString()});db.ref('leaderboard_all/'+user).update({coins:coins-req,score:coins-req});document.getElementById("msg").innerHTML='<span style="color:#51cf66">Request sent - MWK '+money.toLocaleString()+'</span>';showBalance();});});}catch(e){}}
+function loadMyWithdrawals(){try{var user;try{user=localStorage.getItem("user");}catch(e){user="Guest";}if(!db)return;db.ref('withdrawals').orderByChild('user').equalTo(user).on('value',function(s){var h='';s.forEach(function(c){var w=c.val();var col=w.status=='Pending'?'#ffaa00':w.status=='Paid'?'#51cf66':'#ff6b6b';h+='<div style="padding:8px;border-bottom:1px solid #222;display:flex;justify-content:space-between"><span>'+w.date.split(',')[0]+' - MWK '+w.money+'</span><span style="color:'+col+';font-weight:bold">'+w.status+'</span></div>';});document.getElementById("myWithdrawals").innerHTML=h||'<span style="color:#666">No withdrawals yet</span>';});}catch(e){}}
+(function(){var games=[{id:'temple',icon:'',name:'Temple Run',reward:'+5 coins'},{id:'memory',icon:'',name:'Memory Match',reward:'+5 coins'},{id:'number',icon:'',name:'Number Guess',reward:'+5 coins'},{id:'reaction',icon:'',name:'Reaction Test',reward:'+5 coins'},{id:'color',icon:'',name:'Color Match',reward:'+5 coins'},{id:'math',icon:'',name:'Math Challenge',reward:'+5 coins'},{id:'word',icon:'',name:'Word Scramble',reward:'+5 coins'},{id:'checkers',icon:'',name:'Checkers',reward:'+5-25 coins'}];var grid=document.getElementById("gamesGrid");if(grid){var html='';for(var i=0;i<games.length;i++){var g=games[i];html+='<div class="game-card" data-game="'+g.id+'"><div class="game-icon">'+g.icon+'</div><h4>'+g.name+'</h4><div class="game-reward">'+g.reward+'</div></div>';}grid.innerHTML=html;var cards=grid.querySelectorAll('.game-card');for(var j=0;j<cards.length;j++){(function(card){card.onclick=function(){startGame(card.getAttribute('data-game'));};})(cards[j]);}}})();
+function startGame(type){currentGame=type;document.getElementById('playPage').classList.add('active');var pages=document.querySelectorAll('.page');for(var i=0;i<pages.length;i++){if(pages[i].id!=='playPage')pages[i].classList.remove('active');}setGameAdsVisible(false);document.getElementById('gameTitle').innerText=type.charAt(0).toUpperCase()+type.slice(1);if(type==='temple')startTempleRun();else if(type==='memory')startMemoryMatch();else if(type==='number')startNumberGuess();else if(type==='reaction')startReactionTest();else if(type==='color')startColorMatch();else if(type==='math')startMathChallenge();else if(type==='word')startWordScramble();else if(type==='checkers')startCheckers();}
+function startMemoryMatch(){var emojis=['','','','','','','',''];var cards=emojis.concat(emojis).sort(function(){return Math.random()-0.5;});gameState={cards:cards,flipped:[],matched:0,moves:0,startTime:Date.now()};var html='<h3>Match all pairs!</h3><div class="timer" id="timer">Time: 0s | Moves: 0</div><div class="memory-grid">';for(var i=0;i<cards.length;i++){html+='<div class="memory-card" id="card'+i+'" data-idx="'+i+'"><div style="background:#333;width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:10px;">?</div></div>';}html+='</div>';document.getElementById('gameArea').innerHTML=html;var allCards=document.querySelectorAll('.memory-card');for(var j=0;j<allCards.length;j++){(function(card){card.onclick=function(){flipCard(parseInt(card.getAttribute('data-idx')));};})(allCards[j]);}gameState.timerInterval=setInterval(function(){var t=Math.floor((Date.now()-gameState.startTime)/1000);var el=document.getElementById('timer');if(el)el.innerHTML='Time: '+t+'s | Moves: '+gameState.moves;},200);}
+function flipCard(i){if(gameState.flipped.length>=2||gameState.flipped.indexOf(i)!==-1)return;var c=document.getElementById('card'+i);if(!c||c.classList.contains('matched'))return;c.innerHTML=gameState.cards[i];c.style.background='linear-gradient(135deg,#00ffcc,#00ccff)';gameState.flipped.push(i);if(gameState.flipped.length===2){gameState.moves++;var f=gameState.flipped[0],s=gameState.flipped[1];if(gameState.cards[f]===gameState.cards[s]){document.getElementById('card'+f).classList.add('matched');document.getElementById('card'+s).classList.add('matched');gameState.matched+=2;gameState.flipped=[];if(gameState.matched===gameState.cards.length){clearInterval(gameState.timerInterval);handleGameEnd(5,'Complete!','<p>Well done!</p>','startMemoryMatch');}}else{setTimeout(function(){var cf=document.getElementById('card'+f);var cs=document.getElementById('card'+s);if(cf)cf.innerHTML='<div style="background:#333;width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:10px;">?</div>';if(cs)cs.innerHTML='<div style="background:#333;width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:10px;">?</div>';gameState.flipped=[];},800);}}}
+function startNumberGuess(){gameState={target:Math.floor(Math.random()*100)+1,attempts:0};document.getElementById('gameArea').innerHTML='<h3>Guess 1-100</h3><div class="timer" id="gTimer">Attempts: 0/7</div><input type="number" id="guessInput" placeholder="Enter guess"><button id="guessBtn">Submit</button><p id="guessHint"></p>';document.getElementById('guessBtn').onclick=makeGuess;}
+function makeGuess(){var g=parseInt(document.getElementById('guessInput').value);if(!g)return;gameState.attempts++;document.getElementById('gTimer').innerText='Attempts: '+gameState.attempts+'/7';if(g===gameState.target){handleGameEnd(5,'Correct!','','startNumberGuess');}else if(gameState.attempts>=7){handleGameEnd(5,'Game Over','<p>Answer: '+gameState.target+'</p>','startNumberGuess');}else{document.getElementById('guessHint').innerHTML=g<gameState.target?'Higher!':'Lower!';document.getElementById('guessInput').value='';}}
+function startReactionTest(){gameState={round:0,scores:[],waiting:false};document.getElementById('gameArea').innerHTML='<h3>Click when GREEN</h3><div class="timer" id="rTimer">Round 0/5</div><div id="reactionBox" style="height:200px;background:#ff6b6b;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer"><span id="reactionText">START</span></div><button id="rStartBtn">START</button>';document.getElementById('rStartBtn').onclick=startReactionRound;document.getElementById('reactionBox').onclick=reactionClick;}
+function startReactionRound(){var box=document.getElementById('reactionBox');box.style.background='#ff6b6b';document.getElementById('reactionText').innerText='Wait...';gameState.waiting=true;setTimeout(function(){var b=document.getElementById('reactionBox');if(b)b.style.background='#51cf66';var t=document.getElementById('reactionText');if(t)t.innerText='CLICK!';gameState.start=Date.now();gameState.waiting=false;},1000+Math.random()*3000);}
+function reactionClick(){if(gameState.waiting)return;var box=document.getElementById('reactionBox');if(!box||box.style.background!=='rgb(81, 207, 102)')return;var t=Date.now()-gameState.start;gameState.scores.push(t);gameState.round++;if(gameState.round===5){handleGameEnd(5,'Done!','<p>Test complete</p>','startReactionTest');}else{var rt=document.getElementById('reactionText');if(rt)rt.innerText='START';}}
+function startColorMatch(){gameState={round:0,score:0};nextColor();}
+function nextColor(){if(gameState.round>=10){handleGameEnd(5,'Done!','<p>Score '+gameState.score+'/10</p>','startColorMatch');return;}var colors=['Red','Blue','Green','Yellow'];var map={Red:'#ff6b6b',Blue:'#4dabf7',Green:'#51cf66',Yellow:'#ffd700'};var word=colors[Math.floor(Math.random()*4)];var ink;do{ink=colors[Math.floor(Math.random()*4)];}while(ink===word);gameState.correct=ink;gameState.round++;var btns='';for(var i=0;i<colors.length;i++){btns+='<button class="color-btn" style="background:'+map[colors[i]]+';color:#000" data-color="'+colors[i]+'">'+colors[i]+'</button>';}document.getElementById('gameArea').innerHTML='<h3>What color is the WORD?</h3><div class="timer">'+gameState.round+'/10 | Score: '+gameState.score+'</div><div style="font-size:48px;margin:30px;color:'+map[ink]+'">'+word+'</div><div class="color-options">'+btns+'</div>';var allBtns=document.querySelectorAll('.color-btn');for(var j=0;j<allBtns.length;j++){(function(btn){btn.onclick=function(){if(btn.getAttribute('data-color')===gameState.correct)gameState.score++;nextColor();};})(allBtns[j]);}}
+function startMathChallenge(){gameState={round:0,score:0};nextMath();}
+function nextMath(){if(gameState.round>=10){handleGameEnd(5,'Done!','<p>Score '+gameState.score+'/10</p>','startMathChallenge');return;}var a=Math.floor(Math.random()*20)+1;var b=Math.floor(Math.random()*20)+1;gameState.answer=a+b;gameState.round++;document.getElementById('gameArea').innerHTML='<h3>Solve quickly!</h3><div class="timer">'+gameState.round+'/10 | Score: '+gameState.score+'</div><div style="font-size:48px;margin:30px;">'+a+' + '+b+' =?</div><input type="number" id="mathAns" style="text-align:center;font-size:24px;"><button id="mathBtn">Submit</button>';document.getElementById('mathBtn').onclick=function(){if(parseInt(document.getElementById('mathAns').value)===gameState.answer)gameState.score++;nextMath();};}
+function startWordScramble(){gameState={words:['GAME','COIN','PLAY','WIN','MONEY','MALAWI','PHONE','PRIZE'].sort(function(){return Math.random()-0.5;}),round:0,score:0};nextWord();}
+function nextWord(){if(gameState.round>=8){handleGameEnd(5,'Done!','<p>Score '+gameState.score+'/8</p>','startWordScramble');return;}var w=gameState.words[gameState.round];gameState.answer=w;var s=w.split('').sort(function(){return Math.random()-0.5;}).join('');gameState.round++;document.getElementById('gameArea').innerHTML='<h3>Unscramble!</h3><div class="timer">'+gameState.round+'/8 | Score: '+gameState.score+'</div><div style="font-size:48px;letter-spacing:8px;margin:30px;">'+s+'</div><input type="text" id="wordAns" style="text-align:center;font-size:24px;text-transform:uppercase;"><button id="wordBtn">Submit</button>';document.getElementById('wordBtn').onclick=function(){var el=document.getElementById('wordAns');if(el&&el.value.toUpperCase()===gameState.answer)gameState.score++;nextWord();};}
+function startCheckers(){document.getElementById('gameArea').innerHTML='<h3>Checkers - Malawi Rules</h3><p style="color:#ccc">Must capture if possible</p><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:400px;margin:20px auto"><button id="cEasy">Easy</button><button id="cMed">Medium</button><button id="cHard">HARD</button></div>';document.getElementById('cEasy').onclick=function(){initCheckers('easy');};document.getElementById('cMed').onclick=function(){initCheckers('medium');};document.getElementById('cHard').onclick=function(){initCheckers('hard');};}
+function initCheckers(d){gameState={board:[],turn:1,selected:null,validMoves:[],difficulty:d};for(var r=0;r<8;r++){gameState.board[r]=[];for(var c=0;c<8;c++)gameState.board[r][c]=(r+c)%2&&r<3?-1:(r+c)%2&&r>4?1:0;}renderCheckers();}
+function renderCheckers(){var h='<div class="timer">'+gameState.difficulty+' | '+(gameState.turn===1?'Your turn':'CPU')+'</div><div style="display:grid;grid-template-columns:repeat(8,1fr);max-width:360px;margin:10px auto;border:3px solid #00ffcc;aspect-ratio:1">';for(var r=0;r<8;r++)for(var c=0;c<8;c++){var dark=(r+c)%2;var p=gameState.board[r][c];var bg=dark?'#1a1a1a':'#e0e0e0';var sel='';if(gameState.selected&&gameState.selected[0]===r&&gameState.selected[1]===c)sel='outline:3px solid #00ffcc;outline-offset:-3px';var vm=gameState.validMoves;var isVM=false;for(var k=0;k<vm.length;k++){if(vm[k][0]===r&&vm[k][1]===c){isVM=true;break;}}if(isVM)bg='#00ffcc88';h+='<div data-r="'+r+'" data-c="'+c+'" style="aspect-ratio:1;background:'+bg+';'+sel+';display:flex;align-items:center;justify-content:center;cursor:pointer" class="sq">';if(p!==0){var red=p>0;var king=Math.abs(p)===2;h+='<div style="width:70%;height:70%;border-radius:50%;background:'+(red?'radial-gradient(circle,#ff6b6b,#c92a2a)':'radial-gradient(circle,#444,#000)')+';border:2px solid #888;display:flex;align-items:center;justify-content:center;color:#ffd700">'+(king?'':'')+'</div>';}h+='</div>';}h+='</div>';document.getElementById('gameArea').innerHTML=h;var squares=document.querySelectorAll('.sq');for(var j=0;j<squares.length;j++){(function(sq){sq.onclick=function(){clickSquare(parseInt(sq.getAttribute('data-r')),parseInt(sq.getAttribute('data-c')));};})(squares[j]);}}
+function clickSquare(r,c){if(gameState.turn!==1)return;var p=gameState.board[r][c];var all=getAllMoves(1);var must=false;for(var i=0;i<all.length;i++){if(Math.abs(all[i].from[0]-all[i].to[0])===2){must=true;break;}}if(gameState.selected){var vm=gameState.validMoves;var found=false;for(var k=0;k<vm.length;k++){if(vm[k][0]===r&&vm[k][1]===c){found=true;break;}}if(found){var cont=makeMove(gameState.selected[0],gameState.selected[1],r,c);if(!cont){gameState.selected=null;gameState.validMoves=[];renderCheckers();setTimeout(cpuMove,300);}return;}gameState.selected=null;gameState.validMoves=[];}if(p>0){if(must){var can=false;for(var m=0;m<all.length;m++){if(all[m].from[0]===r&&all[m].from[1]===c&&Math.abs(all[m].from[0]-all[m].to[0])===2){can=true;break;}}if(!can)return;}gameState.selected=[r,c];gameState.validMoves=getMoves(r,c,1);renderCheckers();}}
+function getMoves(r,c,pl){var b=gameState.board;var pc=b[r][c];var m=[];var cap=[];var md=Math.abs(pc)===2?[-1,1]:(pl===1?[-1]:[1]);for(var di=0;di<md.length;di++){for(var ci=0;ci<2;ci++){var dc=ci===0?-1:1;var nr=r+md[di],nc=c+dc;if(nr>=0&&nr<8&&nc>=0&&nc<8&&b[nr][nc]===0)m.push([nr,nc]);}}for(var di2=0;di2<2;di2++){for(var ci2=0;ci2<2;ci2++){var dr=di2===0?-1:1;var dc=ci2===0?-1:1;var nr2=r+dr,nc2=c+dc,jr=r+dr*2,jc=c+dc*2;if(jr>=0&&jr<8&&jc>=0&&jc<8&&b[nr2][nc2]*pl<0&&b[jr][jc]===0)cap.push([jr,jc]);}}return cap.length?cap:m;}
+function getAllMoves(pl){var all=[];var has=false;for(var r=0;r<8;r++)for(var c=0;c<8;c++)if(gameState.board[r][c]*pl>0){var caps=[];for(var di=0;di<2;di++)for(var ci=0;ci<2;ci++){var dr=di===0?-1:1;var dc=ci===0?-1:1;var nr=r+dr,nc=c+dc,jr=r+dr*2,jc=c+dc*2;if(jr>=0&&jr<8&&jc>=0&&jc<8&&gameState.board[nr][nc]*pl<0&&gameState.board[jr][jc]===0){has=true;caps.push([jr,jc]);}}var ms=caps.length?caps:getMoves(r,c,pl);for(var k=0;k<ms.length;k++)all.push({from:[r,c],to:ms[k]});}if(has){var filtered=[];for(var f=0;f<all.length;f++){if(Math.abs(all[f].from[0]-all[f].to[0])===2)filtered.push(all[f]);}return filtered;}return all;}
+function makeMove(r1,c1,r2,c2){var b=gameState.board;b[r2][c2]=b[r1][c1];b[r1][c1]=0;var cap=false;if(Math.abs(r2-r1)===2){b[(r1+r2)/2][(c1+c2)/2]=0;cap=true;}if(r2===0&&b[r2][c2]===1)b[r2][c2]=2;if(r2===7&&b[r2][c2]===-1)b[r2][c2]=-2;if(cap){var fm=getMoves(r2,c2,b[r2][c2]>0?1:-1);var fCaps=[];for(var i=0;i<fm.length;i++){if(Math.abs(fm[i][0]-r2)===2)fCaps.push(fm[i]);}if(fCaps.length){gameState.selected=[r2,c2];gameState.validMoves=fCaps;renderCheckers();return true;}}gameState.turn*=-1;gameState.selected=null;gameState.validMoves=[];checkWin();return false;}
+function cpuMove(){if(gameState.turn!==-1)return;var moves=getAllMoves(-1);if(!moves.length){endCheckers(true);return;}var choice;var caps=[];for(var i=0;i<moves.length;i++){if(Math.abs(moves[i].from[0]-moves[i].to[0])===2)caps.push(moves[i]);}if(gameState.difficulty==='easy'){choice=moves[Math.random()*moves.length|0];}else if(gameState.difficulty==='medium'){var pool=caps.length?caps:moves;choice=pool[Math.random()*pool.length|0];}else{var best=-1e9;for(var j=0;j<moves.length;j++){var v=Math.random()*100;if(v>best){best=v;choice=moves[j];}}}var cont=makeMove(choice.from[0],choice.from[1],choice.to[0],choice.to[1]);renderCheckers();if(cont)setTimeout(cpuMove,300);}
+function checkWin(){var f=gameState.board.flat?gameState.board.flat():[].concat.apply([],gameState.board);var pCount=0,cCount=0;for(var i=0;i<f.length;i++){if(f[i]>0)pCount++;if(f[i]<0)cCount++;}if(cCount===0)endCheckers(true);else if(pCount===0)endCheckers(false);else if(getAllMoves(gameState.turn).length===0)endCheckers(gameState.turn===-1);}
+function endCheckers(w){handleGameEnd(w?25:5,w?'You Win!':'CPU Wins','','startCheckers');}
+function startTempleRun(){document.getElementById('gameArea').innerHTML='<h3>Temple Run - Ancient Escape</h3><div class="timer" id="templeHUD">0m | 0</div><canvas id="templeCanvas" width="360" height="480" style="width:100%;max-width:400px;background:#000;border-radius:15px;border:2px solid #00ffcc;touch-action:none"></canvas><p style="color:#999;font-size:12px;margin-top:8px">Swipe left/right to move, up to jump, down to slide</p>';var c=document.getElementById('templeCanvas'),ctx=c.getContext('2d');var W=360,H=480,lanes=[75,180,285];gameState={lane:1,y:380,vy:0,onGround:true,sliding:false,slideT:0,speed:5,dist:0,coins:0,obs:[],coinObjs:[],t:0,alive:true,bg:0,particles:[]};function spawn(){var lane=Math.floor(Math.random()*3);var type=Math.random()<0.6?'jump':'slide';gameState.obs.push({lane:lane,y:-70,type:type,w:50,h:type==='jump'?45:22});if(Math.random()<0.5)gameState.coinObjs.push({lane:Math.floor(Math.random()*3),y:-40});}function update(){if(!gameState.alive)return;gameState.t++;gameState.dist+=gameState.speed*0.12;gameState.speed+=0.002;gameState.bg=(gameState.bg+gameState.speed)%40;if(gameState.t%Math.max(45,80-Math.floor(gameState.speed))===0)spawn();if(!gameState.onGround){gameState.vy+=0.85;gameState.y+=gameState.vy;if(gameState.y>=380){gameState.y=380;gameState.onGround=true;gameState.vy=0;}}if(gameState.sliding){gameState.slideT--;if(gameState.slideT<=0)gameState.sliding=false;}for(var i=gameState.obs.length-1;i>=0;i--){var o=gameState.obs[i];o.y+=gameState.speed;if(o.y>H+60)gameState.obs.splice(i,1);else if(o.y>320&&o.y<410&&o.lane===gameState.lane&&!o.hit){var hit=false;if(o.type==='jump'&&gameState.onGround&&!gameState.sliding)hit=true;if(o.type==='slide'&&!gameState.sliding&&gameState.onGround)hit=true;if(o.type==='slide'&&gameState.y<370)hit=true;if(hit){o.hit=true;gameState.alive=false;setTimeout(endRun,200);return;}}}for(var j=gameState.coinObjs.length-1;j>=0;j--){var co=gameState.coinObjs[j];co.y+=gameState.speed;if(co.y>H)gameState.coinObjs.splice(j,1);else if(Math.abs(co.y-gameState.y)<35&&co.lane===gameState.lane){gameState.coins++;gameState.coinObjs.splice(j,1);gameState.particles.push({x:lanes[gameState.lane],y:gameState.y-20,t:15});}}for(var p=gameState.particles.length-1;p>=0;p--){gameState.particles[p].t--;if(gameState.particles[p].t<=0)gameState.particles.splice(p,1);}document.getElementById('templeHUD').innerText=Math.floor(gameState.dist)+'m | '+gameState.coins;}function draw(){var grad=ctx.createLinearGradient(0,0,0,H);grad.addColorStop(0,'#001a1f');grad.addColorStop(0.4,'#00333d');grad.addColorStop(1,'#000');ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);ctx.fillStyle='rgba(0,255,204,0.08)';for(var i=0;i<6;i++){var x=i*70-10;ctx.fillRect(x,140,40,180);ctx.fillRect(x+30,110,20,30);}ctx.fillStyle='rgba(0,255,204,0.15)';ctx.beginPath();ctx.arc(300,80,35,0,Math.PI*2);ctx.fill();ctx.fillStyle='#0d0d0d';ctx.fillRect(30,0,300,H);ctx.strokeStyle='rgba(0,255,204,0.25)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(30,0);ctx.lineTo(30,H);ctx.moveTo(330,0);ctx.lineTo(330,H);ctx.stroke();for(var l=1;l<3;l++){ctx.strokeStyle='rgba(0,255,204,0.15)';ctx.setLineDash([20,20]);ctx.beginPath();ctx.moveTo(30+l*100,0);ctx.lineTo(30+l*100,H);ctx.stroke();}ctx.setLineDash([]);ctx.strokeStyle='rgba(0,204,255,0.2)';for(var y=-40;y<H;y+=40){ctx.beginPath();ctx.moveTo(30,y+gameState.bg);ctx.lineTo(330,y+gameState.bg);ctx.stroke();}gameState.coinObjs.forEach(function(co){var x=lanes[co.lane];ctx.save();ctx.translate(x,co.y);ctx.rotate(gameState.t*0.1);ctx.fillStyle='#ffd700';ctx.shadowColor='#ffaa00';ctx.shadowBlur=15;ctx.beginPath();ctx.arc(0,0,14,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ffef99';ctx.beginPath();ctx.arc(0,0,8,0,Math.PI*2);ctx.fill();ctx.restore();});gameState.obs.forEach(function(o){var x=lanes[o.lane];ctx.save();ctx.translate(x,o.y);if(o.type==='jump'){var grd=ctx.createLinearGradient(-25,-20,25,25);grd.addColorStop(0,'#8B5A2B');grd.addColorStop(1,'#5C4033');ctx.fillStyle=grd;ctx.shadowColor='#000';ctx.shadowBlur=10;ctx.fillRect(-25,-20,50,40);ctx.fillStyle='#654321';for(var b=0;b<3;b++)ctx.fillRect(-22+b*16,-18,12,36);}else{ctx.fillStyle='rgba(0,255,255,0.3)';ctx.fillRect(-35,-10,70,8);ctx.fillStyle='#00ffcc';ctx.shadowColor='#00ffff';ctx.shadowBlur=20;ctx.fillRect(-30,-8,60,4);ctx.fillStyle='#0088aa';ctx.fillRect(-32,10,12,25);ctx.fillRect(20,10,12,25);}ctx.restore();});var px=lanes[gameState.lane],py=gameState.y;ctx.save();ctx.translate(px,py);if(gameState.sliding)ctx.scale(1,0.55);ctx.shadowColor='#00ffcc';ctx.shadowBlur=25;ctx.fillStyle='#00ffcc';ctx.beginPath();ctx.arc(0,-28,12,0,Math.PI*2);ctx.fill();ctx.shadowBlur=15;ctx.fillStyle='#00ccff';ctx.fillRect(-14,-18,28,32);ctx.fillStyle='#001a1a';ctx.fillRect(-10,-12,8,6);ctx.fillRect(2,-12,8,6);if(!gameState.sliding){ctx.fillStyle='#00ffcc';ctx.fillRect(-16,14,8,18);ctx.fillRect(8,14,8,18);}ctx.restore();gameState.particles.forEach(function(pt){ctx.fillStyle='rgba(255,215,0,'+(pt.t/15)+')';ctx.beginPath();ctx.arc(pt.x,pt.y-pt.t,3,0,Math.PI*2);ctx.fill();});}function loop(){update();draw();if(gameState.alive)requestAnimationFrame(loop);}function endRun(){var d=Math.floor(gameState.dist);handleGameEnd(5,'Temple Complete!','<p>Distance: '+d+'m</p><p>Coins: '+gameState.coins+'</p>','startTempleRun');}var sx=0,sy=0;c.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;sy=e.touches[0].clientY;e.preventDefault();},{passive:false});c.addEventListener('touchend',function(e){var dx=e.changedTouches[0].clientX-sx;var dy=e.changedTouches[0].clientY-sy;if(Math.abs(dx)>Math.abs(dy)){if(dx>25&&gameState.lane<2)gameState.lane++;else if(dx<-25&&gameState.lane>0)gameState.lane--;}else{if(dy<-25&&gameState.onGround){gameState.onGround=false;gameState.vy=-15;}else if(dy>25&&!gameState.sliding){gameState.sliding=true;gameState.slideT=28;}}e.preventDefault();},{passive:false});var keyHandler=function(e){if(!gameState.alive)return;if(e.key==='ArrowLeft'&&gameState.lane>0){gameState.lane--;e.preventDefault();}if(e.key==='ArrowRight'&&gameState.lane<2){gameState.lane++;e.preventDefault();}if((e.key==='ArrowUp'||e.key===' ')&&gameState.onGround){gameState.onGround=false;gameState.vy=-15;e.preventDefault();}if(e.key==='ArrowDown'&&!gameState.sliding){gameState.sliding=true;gameState.slideT=28;e.preventDefault();}};window.addEventListener('keydown',keyHandler);gameState.cleanup=function(){window.removeEventListener('keydown',keyHandler);};loop();}
+var currentLeaderboardView='daily';const lb_flags={MW:"",ZM:"",TZ:"",KE:"",ZA:"",NG:"",US:"",GB:"",IN:""};const HIDE_USERS=["Admin_Mada","Mada_Banda"];function getToday(){return new Date().toISOString().split('T')[0];}function getWeek(){const d=new Date();const y=d.getFullYear();const o=new Date(y,0,1);return y+"-W"+Math.ceil((((d-o)/86400000)+o.getDay()+1)/7);}function setView(view){currentLeaderboardView=view;['Daily','Weekly','All'].forEach(v=>{const btn=document.getElementById('btn'+v);if(!btn)return;const active=v.toLowerCase()===view;btn.style.background=active?'#00ffcc':'#333';btn.style.color=active?'#000':'#00ffcc';btn.style.border=active?'none':'2px solid #00ffcc';});updateLeaderboard();}function updateLeaderboard(){const user=localStorage.getItem("user")||"Guest";let path=currentLeaderboardView==='daily'?"leaderboard_daily/"+getToday():currentLeaderboardView==='weekly'?"leaderboard_weekly/"+getWeek():"leaderboard_all";db.ref(path).orderByChild("coins").limitToLast(50).once("value",snap=>{let list=[];snap.forEach(c=>{const v=c.val()||{};if(v.banned===true||HIDE_USERS.includes(c.key)||!v.coins)return;list.push({name:c.key,coins:v.coins||0,country:v.country||"MW",displayName:v.displayName||c.key,lastPlayed:v.lastPlayed||0,gamesPlayed:v.gamesPlayed||0});});if(list.length===0&&currentLeaderboardView!=='all'){db.ref("leaderboard_all").orderByChild("lastPlayed").limitToLast(50).once("value",s2=>{const now=Date.now();const cutoff=currentLeaderboardView==='daily'?now-86400000:now-604800000;s2.forEach(c=>{const v=c.val()||{};if((v.lastPlayed||0)>cutoff&&!v.banned&&!HIDE_USERS.includes(c.key)){list.push({name:c.key,coins:v.coins||0,country:v.country||"MW",displayName:v.displayName||c.key,lastPlayed:v.lastPlayed,gamesPlayed:v.gamesPlayed||0});}});renderBoard(list,user);});return;}renderBoard(list,user);});}function renderBoard(list,user){list.sort((a,b)=>b.coins-a.coins);list=list.slice(0,10);db.ref("presence").once("value",presSnap=>{const presence={};presSnap.forEach(p=>{const v=p.val()||{};presence[p.key]=v.state==='online'&&(Date.now()-(v.last||0)<120000);});let html="";list.forEach((p,i)=>{const medal=i===0?"":i===1?"":i===2?"":"<span style='color:#666'>#"+(i+1)+"</span>";const flag=lb_flags[p.country]||"";const isMe=p.name===user;const online=presence[p.name]?'<span style="display:inline-block;width:8px;height:8px;background:#00ff66;border-radius:50%;margin-left:6px;box-shadow:0 0 6px #00ff66"></span>':'';const bg=isMe?"background:linear-gradient(135deg,#00ffcc22,#00ccff22);border:2px solid #00ffcc":"background:#111;border:1px solid #222";html+='<div style="'+bg+';padding:12px;margin:6px 0;border-radius:10px;display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1"><span style="width:30px;text-align:center;font-weight:bold">'+medal+'</span><span style="font-size:20px">'+flag+'</span><span style="font-weight:'+(isMe?'bold':'normal')+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p.displayName+online+'</span></div><div style="text-align:right"><div style="color:#ffd700;font-weight:bold">'+p.coins.toLocaleString()+'</div><div style="font-size:10px;color:#666">'+p.gamesPlayed+' games</div></div></div>';});document.getElementById("board").innerHTML=html||"<p style='color:#666;text-align:center;padding:20px'>No players yet. Be first!</p>";const myData=list.find(p=>p.name===user);const myPos=list.findIndex(p=>p.name===user);const myCoins=myData?myData.coins:parseInt(localStorage.getItem("coins")||0);const country=localStorage.getItem("country")||"MW";const flag=lb_flags[country]||"";const rankText=myPos>=0?'#'+(myPos+1):"Unranked";document.getElementById("myRank").innerHTML='<div style="display:flex;justify-content:space-between;align-items:center"><div style="text-align:left"><div style="font-size:12px;color:#999">YOUR RANK ('+currentLeaderboardView.toUpperCase()+')</div><div style="font-size:18px;font-weight:bold;margin-top:4px">'+flag+' '+user+' <span style="color:#00ffcc">'+rankText+'</span></div></div><div style="text-align:right"><div style="font-size:12px;color:#999">COINS</div><div style="font-size:22px;color:#ffd700;font-weight:bold">'+myCoins.toLocaleString()+'</div></div></div>';window.myRankData={rank:rankText,coins:myCoins,view:currentLeaderboardView};});}function shareRank(){const user=localStorage.getItem("user")||"Player";const data=window.myRankData||{rank:"#?",coins:0,view:"daily"};const text="I'm ranked "+data.rank+" on Mada Game Earn ("+data.view+") with "+data.coins.toLocaleString()+" coins!\n\nPlay & earn real MWK - join now!";if(navigator.share){navigator.share({title:"Mada Game Earn",text:text}).catch(()=>{});}else{navigator.clipboard.writeText(text).then(()=>alert("Rank copied! Share on WhatsApp"));}}var leaderboardInterval;setInterval(function(){if(document.getElementById('leaderboardPage').classList.contains('active'))updateLeaderboard();},10000);var uploadedSongs=[],rewardedSongs=[],uploadListenInterval=null,currentUploadSongIndex=-1,pendingPlayIndex=-1;try{var savedRewarded=localStorage.getItem('rewardedSongs');if(savedRewarded)rewardedSongs=JSON.parse(savedRewarded);}catch(e){rewardedSongs=[];}function handleMusicUpload(){var input=document.getElementById('musicFileInput');if(!input||!input.files||input.files.length===0)return;var addedCount=0;for(var i=0;i<input.files.length;i++){var file=input.files[i];if(!file.type.startsWith('audio/'))continue;var isDuplicate=false;for(var d=0;d<uploadedSongs.length;d++){if(uploadedSongs[d].name===file.name){isDuplicate=true;break;}}if(isDuplicate)continue;var url=URL.createObjectURL(file);uploadedSongs.push({name:file.name,url:url,size:file.size});addedCount++;}if(addedCount>0){var msgEl=document.getElementById('uploadListenMsg');if(msgEl)msgEl.innerHTML='<span style="color:#51cf66">'+addedCount+' song(s) added!</span>';setTimeout(function(){if(msgEl)msgEl.innerHTML='';},3000);}renderUploadedSongs();input.value='';}function renderUploadedSongs(){var list=document.getElementById('uploadedMusicList');if(!list)return;if(uploadedSongs.length===0){list.innerHTML='<p style="color:#555;text-align:center;padding:15px;font-size:14px">No songs uploaded yet</p>';updateUploadCountBadge();return;}var html='';for(var i=0;i<uploadedSongs.length;i++){var song=uploadedSongs[i];var isRewarded=rewardedSongs.indexOf(song.name)!==-1;var isPlaying=(currentUploadSongIndex===i);html+='<div class="upload-song-item">';html+='<span class="upload-song-name">'+song.name.replace(/</g,'&lt;')+'</span>';if(isRewarded){html+='<span class="upload-song-earned">Earned</span>';}else{html+='<button class="upload-song-btn" onclick="playUploadedSong('+i+')" style="background:'+(isPlaying?'linear-gradient(45deg,#e74c3c,#c0392b)':'linear-gradient(45deg,#9b59b6,#8e44ad)')+';color:#fff">'+(isPlaying?'Stop':'Play')+'</button>';}html+='</div>';}list.innerHTML=html;updateUploadCountBadge();}function updateUploadCountBadge(){var badge=document.getElementById('uploadCountBadge');if(badge){var todayEarned=rewardedSongs.length;badge.innerText=todayEarned+' song'+(todayEarned!==1?'s':'')+' earned today';}}function playUploadedSong(index){if(index<0||index>=uploadedSongs.length)return;var song=uploadedSongs[index];var audio=document.getElementById('uploadedAudio');var player=document.getElementById('customAudioPlayer');var nameEl=document.getElementById('uploadedSongName');var timerEl=document.getElementById('uploadListenTimer');var msgEl=document.getElementById('uploadListenMsg');var barEl=document.getElementById('uploadListenBar');if(currentUploadSongIndex===index&&!audio.paused){audio.pause();audio.currentTime=0;if(uploadListenInterval){clearInterval(uploadListenInterval);uploadListenInterval=null;}currentUploadSongIndex=-1;if(timerEl)timerEl.innerText='';if(msgEl)msgEl.innerHTML='';if(barEl)barEl.style.width='0%';renderUploadedSongs();return;}if(rewardedSongs.indexOf(song.name)!==-1){if(msgEl)msgEl.innerHTML='<span style="color:#ff6b6b">Already earned coins for this song today!</span>';player.style.display='block';nameEl.innerText=song.name;audio.src=song.url;audio.play();currentUploadSongIndex=index;if(timerEl)timerEl.innerText='Listening (no reward - already earned)';if(barEl)barEl.style.width='100%';renderUploadedSongs();return;}if(uploadListenInterval){clearInterval(uploadListenInterval);uploadListenInterval=null;}pendingPlayIndex=index;player.style.display='block';nameEl.innerText=song.name;if(timerEl)timerEl.innerText='';if(barEl)barEl.style.width='0%';if(msgEl)msgEl.innerHTML='<span style="color:#ffd700">Loading video ad... Please wait</span>';renderUploadedSongs();triggerMonetagRewardedAd();}function startUploadedSongPlayback(index){if(index<0||index>=uploadedSongs.length)return;var song=uploadedSongs[index];var audio=document.getElementById('uploadedAudio');var player=document.getElementById('customAudioPlayer');var nameEl=document.getElementById('uploadedSongName');var timerEl=document.getElementById('uploadListenTimer');var msgEl=document.getElementById('uploadListenMsg');var barEl=document.getElementById('uploadListenBar');audio.src=song.url;audio.play();currentUploadSongIndex=index;var listenedSeconds=0;var requiredSeconds=60;if(timerEl)timerEl.innerText='0s / '+requiredSeconds+'s';if(msgEl)msgEl.innerHTML='<span style="color:#ffd700">Listening... Keep the song playing to earn +50 coins!</span>';if(barEl){barEl.style.width='0%';barEl.style.background='linear-gradient(90deg,#9b59b6,#e74c3c)';}renderUploadedSongs();if(uploadListenInterval){clearInterval(uploadListenInterval);uploadListenInterval=null;}uploadListenInterval=setInterval(function(){if(audio.paused){if(msgEl)msgEl.innerHTML='<span style="color:#ff6b6b">Song paused! Press play to continue earning...</span>';return;}listenedSeconds++;var percent=Math.min(100,(listenedSeconds/requiredSeconds)*100);if(timerEl)timerEl.innerText=listenedSeconds+'s / '+requiredSeconds+'s';if(barEl)barEl.style.width=percent+'%';if(listenedSeconds>=requiredSeconds){clearInterval(uploadListenInterval);uploadListenInterval=null;addCoins(50);rewardedSongs.push(song.name);try{localStorage.setItem('rewardedSongs',JSON.stringify(rewardedSongs));}catch(e){}if(msgEl)msgEl.innerHTML='<span style="color:#51cf66">+50 coins earned for "'+song.name.replace(/</g,'&lt;')+'"!</span>';if(timerEl)timerEl.innerText='Complete!';if(barEl){barEl.style.width='100%';barEl.style.background='linear-gradient(90deg,#51cf66,#00ffcc)';}currentUploadSongIndex=-1;renderUploadedSongs();setTimeout(function(){if(barEl)barEl.style.background='linear-gradient(90deg,#9b59b6,#e74c3c)';},3000);}},1000);audio.onended=function(){if(uploadListenInterval){clearInterval(uploadListenInterval);uploadListenInterval=null;}if(listenedSeconds<requiredSeconds&&rewardedSongs.indexOf(song.name)===-1){if(msgEl)msgEl.innerHTML='<span style="color:#ff6b6b">Song ended early ('+listenedSeconds+'s/'+requiredSeconds+'s). Press Play again!</span>';currentUploadSongIndex=-1;renderUploadedSongs();}};audio.onerror=function(){if(uploadListenInterval){clearInterval(uploadListenInterval);uploadListenInterval=null;}if(msgEl)msgEl.innerHTML='<span style="color:#ff6b6b">Error playing this file.</span>';currentUploadSongIndex=-1;renderUploadedSongs();};}
+document.addEventListener('DOMContentLoaded',function(){setTimeout(function(){var savedNum=localStorage.getItem('number');if(savedNum){var numEl=document.getElementById('number');var netEl=document.getElementById('network');var btn=document.getElementById('saveBtn');if(numEl){numEl.value=savedNum;numEl.disabled=true;}if(netEl){netEl.value=localStorage.getItem('network')||'Airtel Money';netEl.disabled=true;}if(btn){btn.disabled=true;btn.innerText='Locked';}document.getElementById('saved').innerHTML='<span style="color:#51cf66">Saved and locked</span>';}},1000);var loginBtn=document.getElementById("loginBtn");if(loginBtn){loginBtn.addEventListener('click',function(e){e.preventDefault();register();});}var usernameInput=document.getElementById("usernameInput");if(usernameInput){usernameInput.addEventListener('keypress',function(e){if(e.key==='Enter'){e.preventDefault();register();}});setTimeout(function(){usernameInput.focus();generateCaptcha();},300);}var el;el=document.getElementById("backBtn");if(el)el.onclick=function(){if(gameState&&gameState.cleanup)gameState.cleanup();currentGame=null;gameState={};showPage('games');};el=document.getElementById("navWallet");if(el)el.onclick=function(){showPage('wallet');};el=document.getElementById("navGames");if(el)el.onclick=function(){showPage('games');};el=document.getElementById("navBoard");if(el)el.onclick=function(){showPage('leaderboard');};el=document.getElementById("navWatch");if(el)el.onclick=function(){showPage('watch');};el=document.getElementById("navListen");if(el)el.onclick=function(){showPage('listen');};el=document.getElementById("navInbox");if(el)el.onclick=function(){showPage('inbox');};el=document.getElementById("saveBtn");if(el)el.onclick=saveDetails;el=document.getElementById("dailyBtn");if(el)el.onclick=claimDailyBonus;el=document.getElementById("withdrawBtn");if(el)el.onclick=withdraw;el=document.getElementById("replyBtn");if(el)el.onclick=function(){var u;try{u=localStorage.getItem("user");}catch(e){u=null;}var txt=document.getElementById('playerReply').value.trim();if(!txt||!u||!db)return;var id=['Admin_Mada',u].sort().join('_');db.ref('chats/'+id+'/messages').push({from:u,to:'Admin_Mada',text:txt,timestamp:Date.now(),status:'sent'}).then(function(){document.getElementById('playerReply').value='';document.getElementById('replyStatus').innerHTML='<span style="color:#51cf66">Sent</span>';setTimeout(function(){document.getElementById('replyStatus').innerHTML='';},1500);});};var musicInput=document.getElementById('musicFileInput');if(musicInput){musicInput.addEventListener('change',handleMusicUpload);}try{var u;try{u=localStorage.getItem("user");}catch(e){u=null;}if(u){document.getElementById("loginPage").classList.remove("active");document.getElementById("mainNav").style.display="flex";showPage('wallet');if(db){setupPresence(u);checkInboxBadge();startRealtimeBalance();}}}catch(e){}});function updateWithdrawCountdown(){var el=document.getElementById('withdrawCountdown');if(!el)return;var now=new Date();var malawiOffset=2*60;var utc=now.getTime()+(now.getTimezoneOffset()*60000);var malawiTime=new Date(utc+(malawiOffset*60000));var day=malawiTime.getDay();var hour=malawiTime.getHours();if(day===5&&hour>=18&&hour<21){var end=new Date(malawiTime);end.setHours(21,0,0,0);var diff=end-malawiTime;var h=Math.floor(diff/3600000);var m=Math.floor((diff%3600000)/60000);var s=Math.floor((diff%60000)/1000);el.innerHTML='<span style="color:#51cf66">OPEN! Closes in '+h+'h '+m+'m '+s+'s</span>';return;}var next=new Date(malawiTime);var daysUntilFri=(5-day+7)%7;if(daysUntilFri===0)daysUntilFri=7;if(day===5&&hour<18)daysUntilFri=0;next.setDate(malawiTime.getDate()+daysUntilFri);next.setHours(18,0,0,0);var diff=next-malawiTime;var days=Math.floor(diff/86400000);var h=Math.floor((diff%86400000)/3600000);var m=Math.floor((diff%3600000)/60000);var s=Math.floor((diff%60000)/1000);var text='';if(days>0)text+=days+'d ';text+=h+'h '+m+'m '+s+'s';el.innerHTML='Next: Friday 6PM<br><span style="color:#ffd700">'+text+'</span>';}setInterval(updateWithdrawCountdown,1000);setTimeout(updateWithdrawCountdown,500);
+</script>
+<div style="margin-top:40px;padding:20px;background:#f5f5f5;border-radius:10px;text-align:center;font-size:12px;color:#666">
+<a href="#" onclick="alert('Mada Game Earn - Rewards platform for Malawian users.')" style="margin:0 10px">About Us</a> |
+<a href="#" onclick="alert('Terms: Users must be 18+. One account per person. Fraud = ban.')" style="margin:0 10px">Terms</a> |
+<a href="#" onclick="alert('Privacy: We collect email only for rewards. No data sold.')" style="margin:0 10px">Privacy</a> |
+<a href="#" onclick="alert('Contact: WhatsApp +265 999 123 456')" style="margin:0 10px">Contact</a>
+<p style="margin-top:10px">2024-2026 Mada Game Earn - Lilongwe, Malawi</p>
+</div>
+</body>
+  </html>
