@@ -1,463 +1,270 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VAST Test - HilltopAds Zone 6998413</title>
-  <script src="https://imasdk.googleapis.com/js/sdkloader/ima3.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #030712;
-      --card: #0b1220;
-      --border: rgba(255,255,255,0.08);
-      --text: #e5e7eb;
-      --muted: #9ca3af;
-      --accent: #00a8e8;
-      --accent-glow: rgba(0,168,232,0.35);
-    }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      margin: 0;
-      background: radial-gradient(1200px 800px at 50% -10%, #0e1a2e 0%, #030712 60%, #020408 100%);
-      color: var(--text);
-      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
-    .container {
-      width: 100%;
-      max-width: 720px;
-    }
-    header {
-      text-align: center;
-      margin-bottom: 28px;
-    }
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(0,168,232,0.1);
-      border: 1px solid rgba(0,168,232,0.25);
-      color: #7dd3fc;
-      padding: 6px 12px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: .02em;
-      margin-bottom: 12px;
-    }
-    .badge-dot {
-      width: 6px;
-      height: 6px;
-      background: var(--accent);
-      border-radius: 50%;
-      box-shadow: 0 0 8px var(--accent-glow);
-    }
-    h1 {
-      margin: 0;
-      font-size: clamp(24px, 4vw, 32px);
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      background: linear-gradient(to bottom, #fff, #b6c2d6);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-    header p {
-      margin: 8px 0 0;
-      color: var(--muted);
-      font-size: 15px;
-    }
-    .player-card {
-      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 14px;
-      box-shadow: 0 20px 60px -20px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.02) inset;
-      backdrop-filter: blur(16px);
-    }
-    .video-wrapper {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 16/9;
-      background: #000;
-      border-radius: 14px;
-      overflow: hidden;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
-    }
-    #contentVideo {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      background: #000;
-      display: block;
-    }
-    #adContainer {
-      position: absolute;
-      inset: 0;
-      z-index: 2;
-    }
-    .play-overlay {
-      position: absolute;
-      inset: 0;
-      z-index: 3;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 14px;
-      background: radial-gradient(600px 300px at 50% 50%, rgba(0,168,232,0.18), transparent 60%),
-                  linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.65));
-      cursor: pointer;
-      transition: opacity .3s ease;
-      backdrop-filter: blur(2px);
-    }
-    .play-overlay:hover .play-button { transform: scale(1.06); }
-    .play-button {
-      width: 92px;
-      height: 92px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, #00c3ff, #00a8e8 60%, #0085b8);
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 10px 30px -5px var(--accent-glow), 0 0 0 8px rgba(0,168,232,0.15), inset 0 1px 1px rgba(255,255,255,0.3);
-      animation: pulse 2.2s infinite;
-      transition: transform .2s ease;
-      cursor: pointer;
-    }
-    .play-button svg {
-      width: 34px;
-      height: 34px;
-      fill: white;
-      margin-left: 3px;
-      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
-    }
-    .play-text {
-      color: #e2f6ff;
-      font-weight: 600;
-      font-size: 14px;
-      letter-spacing: .02em;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-    }
-    @keyframes pulse {
-      0% { box-shadow: 0 10px 30px -5px var(--accent-glow), 0 0 0 0 rgba(0,168,232,0.5), inset 0 1px 1px rgba(255,255,255,0.3); }
-      70% { box-shadow: 0 10px 30px -5px var(--accent-glow), 0 0 0 18px rgba(0,168,232,0), inset 0 1px 1px rgba(255,255,255,0.3); }
-      100% { box-shadow: 0 10px 30px -5px var(--accent-glow), 0 0 0 0 rgba(0,168,232,0), inset 0 1px 1px rgba(255,255,255,0.3); }
-    }
-    .status-card {
-      margin-top: 14px;
-      background: rgba(3,7,18,0.7);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .status-dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      background: #6b7280;
-      flex-shrink: 0;
-      transition: all .3s;
-    }
-    .status-card.status-loading .status-dot { background: var(--accent); animation: dotPulse 1.4s infinite; box-shadow: 0 0 12px var(--accent-glow); }
-    .status-card.status-ad .status-dot { background: var(--accent); box-shadow: 0 0 12px var(--accent-glow); }
-    .status-card.status-playing .status-dot { background: #10b981; box-shadow: 0 0 10px rgba(16,185,129,0.5); }
-    .status-card.status-error .status-dot { background: #ef4444; box-shadow: 0 0 10px rgba(239,68,68,0.5); }
-    @keyframes dotPulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.25);opacity:.85} }
-    .status-label { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; line-height: 1; }
-    .status-text { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.3; margin-top: 2px; }
-    .reset-btn {
-      margin-left: auto;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all .2s;
-      display: none;
-    }
-    .reset-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(0,168,232,0.4); }
-    .info-box {
-      margin-top: 20px;
-      background: rgba(11,18,32,0.6);
-      border: 1px solid rgba(0,168,232,0.18);
-      border-radius: 14px;
-      padding: 14px 16px;
-      backdrop-filter: blur(8px);
-    }
-    .info-header { display: flex; gap: 12px; align-items: flex-start; }
-    .info-label {
-      font-size: 11px; font-weight: 700; color: #7dd3fc;
-      letter-spacing: .06em; text-transform: uppercase; margin-bottom: 6px;
-    }
-    .info-url {
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: 12px; color: #cbd5e1; word-break: break-all; line-height: 1.5;
-      background: rgba(0,0,0,0.3); padding: 8px 10px; border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.06);
-    }
-    .copy-btn {
-      flex-shrink: 0;
-      background: linear-gradient(180deg, #00b4f0, #00a8e8);
-      color: #002033; border: none; padding: 8px 14px; border-radius: 9px;
-      font-size: 13px; font-weight: 600; cursor: pointer;
-      box-shadow: 0 4px 14px -3px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.3);
-      transition: transform .15s;
-    }
-    .copy-btn:hover { transform: translateY(-1px); }
-    .copy-btn:active { transform: translateY(0) scale(.98); }
-    .footer { text-align: center; margin-top: 22px; color: #64748b; font-size: 12px; }
-    @media (max-width: 640px) {
-      body { padding: 16px; align-items: flex-start; }
-      .player-card { padding: 10px; border-radius: 16px; }
-      .video-wrapper { border-radius: 10px; }
-      .play-button { width: 78px; height: 78px; }
-      .play-button svg { width: 28px; height: 28px; }
-      header { margin-bottom: 20px; }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <header>
-      <div class="badge"><span class="badge-dot"></span> HilltopAds</div>
-      <h1>VAST Test – Zone 6998413</h1>
-      <p>Click Play to test your VAST tag</p>
-    </header>
+// =====================================================================
+// ===== VAST VIDEO AD — WATCH MENU (FIXED) =====
+// =====================================================================
+var vastAdsLoader = null;
+var vastAdsManager = null;
+var vastAdDisplayContainer = null;   // FIX 1: Was completely missing
+var vastAdTimeoutHandle = null;       // FIX 2: No timeout existed
+var VAST_AD_TIMEOUT_MS = 15000;       // 15 second timeout
+var VAST_TAG_URL = 'https://mellow-habit.com/dpmNFnz.d_GaNbvnZGGxUW/Ie/mC9Mu/ZUUxlPkgPDTrcBwoN/zQcHzkMODLU/tQNWzjAk3VNvztMgwXOFQk';
 
-    <div class="player-card">
-      <div class="video-wrapper" id="videoWrapper">
-        <video id="contentVideo" playsinline webkit-playsinline preload="metadata" poster="https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217">
-          <source src="https://storage.googleapis.com/gvabox/media/samples/BigBuckBunny.mp4" type="video/mp4">
-        </video>
-        <div id="adContainer"></div>
-        <div id="playOverlay" class="play-overlay" role="button" aria-label="Play and test VAST">
-          <button class="play-button" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M8 5.14v14l11-7-11-7z"/></svg>
-          </button>
-          <div class="play-text">Play & Test VAST</div>
-        </div>
-      </div>
+function destroyVastAd() {
+  // Clear timeout
+  if (vastAdTimeoutHandle) {
+    clearTimeout(vastAdTimeoutHandle);
+    vastAdTimeoutHandle = null;
+  }
+  try {
+    if (vastAdsManager) {
+      vastAdsManager.destroy();
+      vastAdsManager = null;
+    }
+  } catch(e) { console.log('VAST destroy error:', e); }
+  vastAdsLoader = null;
+  vastAdDisplayContainer = null;
+  // Clean up video and container
+  try {
+    var videoEl = document.getElementById('vastVideo');
+    if (videoEl) { videoEl.pause(); videoEl.removeAttribute('src'); videoEl.load(); }
+  } catch(e) {}
+  try {
+    var adContainer = document.getElementById('vastAdContainer');
+    if (adContainer) adContainer.innerHTML = '';
+  } catch(e) {}
+}
 
-      <div id="statusCard" class="status-card status-ready">
-        <div class="status-dot"></div>
-        <div>
-          <div class="status-label">STATUS</div>
-          <div id="statusText" class="status-text">Ready</div>
-        </div>
-        <button id="resetBtn" class="reset-btn">Test Again</button>
-      </div>
-    </div>
+function initVastAd() {
+  destroyVastAd();
 
-    <div class="info-box">
-      <div class="info-header">
-        <div style="flex:1; min-width:0;">
-          <div class="info-label">VAST TAG URL</div>
-          <div class="info-url" id="vastUrl"></div>
-        </div>
-        <button id="copyBtn" class="copy-btn">Copy</button>
-      </div>
-    </div>
+  var videoEl = document.getElementById('vastVideo');
+  var adContainer = document.getElementById('vastAdContainer');
 
-    <div class="footer">Powered by Google IMA SDK • HilltopAds Blue #00a8e8</div>
-  </div>
+  if (!videoEl || !adContainer) {
+    console.log('VAST: Missing video or container element');
+    window.vastAdCompleted = true;
+    checkVastAndCountdown();
+    return;
+  }
 
-  <script>
-    const VAST_TAG = "https://mellow-habit.com/ddmDF-zOd.GdNfvPZZGTUw/feJm_9au/ZjUBljk/PFTJYG5ZOITtgV0PMYT/MQt/NQjpkI5oOwDLQFxCNXwp";
-    
-    let video, adContainer, adDisplayContainer, adsLoader, adsManager;
-    let playOverlay, statusCard, statusText, resetBtn;
-    let isAdPlaying = false;
-    let adsInitialized = false;
-
-    const $ = (id) => document.getElementById(id);
-
-    function updateStatus(text, state = 'ready') {
-      statusText.textContent = text;
-      statusCard.className = 'status-card status-' + state;
+  try {
+    if (typeof google === 'undefined' || !google.ima) {
+      console.log('VAST: IMA SDK not available');
+      window.vastAdCompleted = true;
+      checkVastAndCountdown();
+      return;
     }
 
-    function initIMA() {
-      video = $('contentVideo');
-      adContainer = $('adContainer');
-      playOverlay = $('playOverlay');
-      statusCard = $('statusCard');
-      statusText = $('statusText');
-      resetBtn = $('resetBtn');
+    // FIX 3: Create AdDisplayContainer properly.
+    // The old code did: new google.ima.AdsLoader(adContainer)
+    // That passes a raw DOM element, which is WRONG.
+    // IMA requires: new google.ima.AdsLoader(adDisplayContainer)
+    // Without AdDisplayContainer, the ad loads but has nowhere to render,
+    // so it stays stuck at "Loading video..." forever.
+    vastAdDisplayContainer = new google.ima.AdDisplayContainer(
+      adContainer,  // div where ad renders
+      videoEl       // video element for linear ads
+    );
 
-      $('vastUrl').textContent = VAST_TAG;
+    // FIX 4: Initialize the display container.
+    // This MUST be called from a user gesture (click/tap).
+    // Without this, mobile browsers block the ad from rendering.
+    // Since initVastAd() is called from watchOnclickaVideo()
+    // which is triggered by a button click, we are inside a
+    // user gesture context here.
+    vastAdDisplayContainer.initialize();
 
-      try {
-        adDisplayContainer = new google.ima.AdDisplayContainer(adContainer, video);
-        adsLoader = new google.ima.AdsLoader(adDisplayContainer);
+    // FIX 5: Create AdsLoader with the AdDisplayContainer object
+    vastAdsLoader = new google.ima.AdsLoader(vastAdDisplayContainer);
 
-        adsLoader.addEventListener(
-          google.ima.AdsManagerLoadedEvent.Type.ADS_MANAGER_LOADED,
-          onAdsManagerLoaded,
-          false
-        );
-        adsLoader.addEventListener(
-          google.ima.AdErrorEvent.Type.AD_ERROR,
-          onAdError,
-          false
-        );
+    vastAdsLoader.addEventListener(
+      google.ima.AdsManagerLoadedEvent.Type.ADS_MANAGER_LOADED,
+      onVastAdsManagerLoaded,
+      false
+    );
+    vastAdsLoader.addEventListener(
+      google.ima.AdErrorEvent.Type.AD_ERROR,
+      onVastAdLoaderError,
+      false
+    );
 
-        video.addEventListener('ended', onContentEnded);
-        window.addEventListener('resize', onResize);
+    videoEl.load();
 
-        playOverlay.addEventListener('click', onUserPlay);
-        resetBtn.addEventListener('click', () => location.reload());
-        $('copyBtn').addEventListener('click', copyVast);
+    var adsRequest = new google.ima.AdsRequest();
+    adsRequest.adTagUrl = VAST_TAG_URL;
 
-        updateStatus('Ready', 'ready');
-      } catch (e) {
-        updateStatus('IMA failed to load', 'error');
-        console.error(e);
-      }
-    }
+    var containerWidth = adContainer.offsetWidth || 320;
+    var containerHeight = adContainer.offsetHeight || 180;
+    adsRequest.linearAdSlotWidth = containerWidth;
+    adsRequest.linearAdSlotHeight = containerHeight;
+    adsRequest.nonLinearAdSlotWidth = containerWidth;
+    adsRequest.nonLinearAdSlotHeight = Math.floor(containerHeight / 3);
 
-    function onUserPlay() {
-      if (adsInitialized) return;
-      adsInitialized = true;
-      
-      // Mobile requires user gesture
-      adDisplayContainer.initialize();
-      video.load();
-      video.removeAttribute('controls');
-      
-      playOverlay.style.opacity = '0';
-      playOverlay.style.pointerEvents = 'none';
-      setTimeout(() => { playOverlay.style.display = 'none'; }, 300);
-      
-      requestAds();
-    }
-
-    function requestAds() {
-      updateStatus('Requesting ad...', 'loading');
-      
-      const adsRequest = new google.ima.AdsRequest();
-      adsRequest.adTagUrl = VAST_TAG;
-      adsRequest.linearAdSlotWidth = video.clientWidth;
-      adsRequest.linearAdSlotHeight = video.clientHeight;
-      adsRequest.nonLinearAdSlotWidth = video.clientWidth;
-      adsRequest.nonLinearAdSlotHeight = Math.floor(video.clientHeight / 3);
+    // FIX 6: Tell IMA the ad will auto-play.
+    // Without these, Chrome/Firefox may block the ad from playing
+    // because their autoplay policies reject programmatic play() calls.
+    try {
       adsRequest.setAdWillAutoPlay(true);
       adsRequest.setAdWillPlayMuted(false);
-
-      adsLoader.requestAds(adsRequest);
+    } catch(e) {
+      console.log('VAST: setAdWillAutoPlay not supported', e);
     }
 
-    function onAdsManagerLoaded(adsManagerLoadedEvent) {
-      const adsRenderingSettings = new google.ima.AdsRenderingSettings();
-      adsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete = true;
-      adsRenderingSettings.enablePreloading = true;
+    vastAdsLoader.requestAds(adsRequest);
 
-      adsManager = adsManagerLoadedEvent.getAdsManager(video, adsRenderingSettings);
-
-      // Ad lifecycle events
-      adsManager.addEventListener(google.ima.AdErrorEvent.Type.AD_ERROR, onAdError);
-      adsManager.addEventListener(google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED, onContentPause);
-      adsManager.addEventListener(google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED, onContentResume);
-      adsManager.addEventListener(google.ima.AdEvent.Type.LOADED, () => updateStatus('Ad loaded', 'loading'));
-      adsManager.addEventListener(google.ima.AdEvent.Type.STARTED, () => {
-        isAdPlaying = true;
-        updateStatus('Ad playing', 'ad');
-      });
-      adsManager.addEventListener(google.ima.AdEvent.Type.COMPLETE, () => updateStatus('Ad completed', 'ready'));
-      adsManager.addEventListener(google.ima.AdEvent.Type.SKIPPED, () => updateStatus('Ad skipped', 'ready'));
-      adsManager.addEventListener(google.ima.AdEvent.Type.CLICKED, () => updateStatus('Ad clicked', 'ad'));
-      adsManager.addEventListener(google.ima.AdEvent.Type.PAUSED, () => updateStatus('Ad paused', 'ad'));
-      adsManager.addEventListener(google.ima.AdEvent.Type.RESUMED, () => updateStatus('Ad playing', 'ad'));
-      adsManager.addEventListener(google.ima.AdEvent.Type.ALL_ADS_COMPLETED, () => {
-        isAdPlaying = false;
-        updateStatus('All ads completed', 'ready');
-      });
-
-      try {
-        adsManager.init(video.clientWidth, video.clientHeight, google.ima.ViewMode.NORMAL);
-        adsManager.start();
-      } catch (adError) {
-        onAdError(adError);
+    // FIX 7: Set a timeout — if the ad doesn't load within 15 seconds,
+    // something is wrong (network error, empty VAST, ad blocker, CORS).
+    // Without this, the player sits at "Loading" forever.
+    vastAdTimeoutHandle = setTimeout(function() {
+      console.log('VAST: Ad loading timed out after ' + (VAST_AD_TIMEOUT_MS / 1000) + 's');
+      var spinnerEl = document.getElementById('vastSpinner');
+      var statusEl = document.getElementById('onclickaAdStatus');
+      if (spinnerEl) spinnerEl.style.display = 'none';
+      if (statusEl) {
+        statusEl.className = 'ad-status watching';
+        statusEl.innerText = '⚠ Ad timed out. You can still claim reward!';
       }
-    }
+      window.vastAdCompleted = true;
+      checkVastAndCountdown();
+    }, VAST_AD_TIMEOUT_MS);
 
-    function onContentPause() {
-      isAdPlaying = true;
-      video.pause();
-    }
+  } catch(e) {
+    console.log('VAST init error:', e);
+    window.vastAdCompleted = true;
+    checkVastAndCountdown();
+  }
+}
 
-    function onContentResume() {
-      isAdPlaying = false;
-      updateStatus('Content playing', 'playing');
-      video.setAttribute('controls', '');
-      
-      const playPromise = video.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {
-          updateStatus('Tap video to play content', 'ready');
-        });
-      }
-      resetBtn.style.display = 'inline-flex';
-    }
+function onVastAdsManagerLoaded(adsManagerLoadedEvent) {
+  // FIX 8: Clear the timeout — ad loaded successfully
+  if (vastAdTimeoutHandle) {
+    clearTimeout(vastAdTimeoutHandle);
+    vastAdTimeoutHandle = null;
+  }
 
-    function onAdError(adErrorEvent) {
-      const error = adErrorEvent.getError ? adErrorEvent.getError() : adErrorEvent;
-      console.error('Ad Error:', error);
-      updateStatus('Ad error - playing content', 'error');
-      
-      if (adsManager) {
-        try { adsManager.destroy(); } catch(e) {}
-      }
-      isAdPlaying = false;
-      onContentResume();
-    }
+  var videoEl = document.getElementById('vastVideo');
+  var adContainer = document.getElementById('vastAdContainer');
 
-    function onContentEnded() {
-      updateStatus('Content ended', 'ready');
-      if (adsLoader) adsLoader.contentComplete();
-      resetBtn.style.display = 'inline-flex';
-    }
+  if (!videoEl || !adContainer) {
+    window.vastAdCompleted = true;
+    checkVastAndCountdown();
+    return;
+  }
 
-    function onResize() {
-      if (adsManager && video.clientWidth > 0) {
-        adsManager.resize(video.clientWidth, video.clientHeight, google.ima.ViewMode.NORMAL);
-      }
-    }
+  try {
+    var adsRenderingSettings = new google.ima.AdsRenderingSettings();
+    // FIX 9: Set to false (was true, which can cause issues)
+    adsRenderingSettings.restoreCustomPlaybackStateOnAdBreakCompletion = false;
+    adsRenderingSettings.enablePreloading = true;
 
-    function copyVast() {
-      navigator.clipboard.writeText(VAST_TAG).then(() => {
-        const btn = $('copyBtn');
-        const original = btn.textContent;
-        btn.textContent = 'Copied!';
-        setTimeout(() => { btn.textContent = original; }, 1800);
-      });
-    }
+    vastAdsManager = adsManagerLoadedEvent.getAdsManager(videoEl, adsRenderingSettings);
 
-    // Initialize when IMA is ready
-    window.addEventListener('load', () => {
-      const checkIMA = () => {
-        if (window.google && google.ima) {
-          initIMA();
-        } else {
-          setTimeout(checkIMA, 100);
-        }
-      };
-      checkIMA();
+    // Add error listener on the manager too
+    vastAdsManager.addEventListener(google.ima.AdErrorEvent.Type.AD_ERROR, onVastAdManagerError);
+
+    vastAdsManager.addEventListener(google.ima.AdEvent.Type.LOADED, function() {
+      console.log('VAST: Ad LOADED');
+      var statusEl = document.getElementById('onclickaAdStatus');
+      var spinnerEl = document.getElementById('vastSpinner');
+      if (spinnerEl) spinnerEl.style.display = 'none';
+      if (statusEl) { statusEl.className = 'ad-status watching'; statusEl.innerText = '⏳ Video ad loaded, starting...'; }
     });
-  </script>
-</body>
-  </html>
+
+    vastAdsManager.addEventListener(google.ima.AdEvent.Type.STARTED, function() {
+      console.log('VAST: Ad STARTED playing');
+      var statusEl = document.getElementById('onclickaAdStatus');
+      var spinnerEl = document.getElementById('vastSpinner');
+      if (spinnerEl) spinnerEl.style.display = 'none';
+      if (statusEl) { statusEl.className = 'ad-status watching'; statusEl.innerText = '⏳ Video ad is playing...'; }
+    });
+
+    vastAdsManager.addEventListener(google.ima.AdEvent.Type.COMPLETE, function() {
+      console.log('VAST: Ad COMPLETE');
+      window.vastAdCompleted = true;
+      checkVastAndCountdown();
+    });
+
+    vastAdsManager.addEventListener(google.ima.AdEvent.Type.SKIPPED, function() {
+      console.log('VAST: Ad SKIPPED');
+      window.vastAdCompleted = true;
+      checkVastAndCountdown();
+    });
+
+    vastAdsManager.addEventListener(google.ima.AdEvent.Type.ALL_ADS_COMPLETED, function() {
+      console.log('VAST: ALL_ADS_COMPLETED');
+      window.vastAdCompleted = true;
+      checkVastAndCountdown();
+    });
+
+    vastAdsManager.addEventListener(google.ima.AdEvent.Type.IMPRESSION, function() {
+      console.log('VAST: Ad IMPRESSION fired');
+    });
+
+    // Initialize and start the ad
+    var containerWidth = adContainer.offsetWidth || 320;
+    var containerHeight = adContainer.offsetHeight || 180;
+    vastAdsManager.init(containerWidth, containerHeight, google.ima.ViewMode.NORMAL);
+    vastAdsManager.start();
+
+  } catch(e) {
+    console.log('VAST manager error:', e);
+    window.vastAdCompleted = true;
+    checkVastAndCountdown();
+  }
+}
+
+// FIX 10: Separate error handlers for loader vs manager
+function onVastAdLoaderError(adErrorEvent) {
+  // This fires when AdsLoader encounters an error
+  // (VAST parse error, network failure, empty response, ad blocker, CORS)
+  var error = adErrorEvent.getError();
+  var errorCode = error ? error.getErrorCode() : 'UNKNOWN';
+  var errorMessage = error ? error.getMessage() : 'Unknown error';
+  var vastErrorCode = (error && typeof error.getVastErrorCode === 'function') ? error.getVastErrorCode() : 'N/A';
+  console.log('VAST Loader Error [' + errorCode + '] VAST:' + vastErrorCode + ' — ' + errorMessage);
+
+  if (vastAdTimeoutHandle) {
+    clearTimeout(vastAdTimeoutHandle);
+    vastAdTimeoutHandle = null;
+  }
+
+  try { if (vastAdsManager) { vastAdsManager.destroy(); vastAdsManager = null; } } catch(e) {}
+
+  var spinnerEl = document.getElementById('vastSpinner');
+  if (spinnerEl) spinnerEl.style.display = 'none';
+
+  var statusEl = document.getElementById('onclickaAdStatus');
+  if (statusEl) {
+    statusEl.className = 'ad-status watching';
+    statusEl.innerText = '⚠ Ad unavailable. You can still claim reward!';
+  }
+
+  // Mark completed so user isn't stuck forever
+  window.vastAdCompleted = true;
+  checkVastAndCountdown();
+}
+
+function onVastAdManagerError(adErrorEvent) {
+  // This fires when AdsManager encounters an error during playback
+  var error = adErrorEvent.getError();
+  var errorMessage = error ? error.getMessage() : 'Unknown playback error';
+  console.log('VAST Manager Error: ' + errorMessage);
+
+  try { if (vastAdsManager) { vastAdsManager.destroy(); vastAdsManager = null; } } catch(e) {}
+
+  var spinnerEl = document.getElementById('vastSpinner');
+  if (spinnerEl) spinnerEl.style.display = 'none';
+
+  window.vastAdCompleted = true;
+  checkVastAndCountdown();
+}
+
+function checkVastAndCountdown() {
+  if (window.vastAdCompleted && window.vastCountdownDone) {
+    var numEl = document.getElementById('onclickaCountNum');
+    var statusEl = document.getElementById('onclickaAdStatus');
+    var claimBtn = document.getElementById('onclickaClaimBtn');
+    if (numEl) numEl.innerText = '✅';
+    if (statusEl) { statusEl.className = 'ad-status complete'; statusEl.innerText = '🎉 Video complete! Claim your reward!'; }
+    if (claimBtn) claimBtn.style.display = 'block';
+  }
+}
