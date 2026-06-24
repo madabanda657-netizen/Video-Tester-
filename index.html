@@ -1,605 +1,240 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Admin Panel - Mada Game</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<title>Click to Watch</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: Arial, sans-serif; background: #0a0a0a; color: #fff; }
-.container { padding: 20px; max-width: 1200px; margin: 0 auto; }
-.header { background: #111; padding: 15px 20px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-.card { background: #111; padding: 20px; margin: 15px 0; border-radius: 10px; border: 1px solid #00ffcc33; }
-table { width: 100%; border-collapse: collapse; }
-th, td { padding: 12px; text-align: left; border-bottom: 1px solid #333; font-size: 13px; }
-th { color: #00ffcc; font-size: 11px; text-transform: uppercase; }
-.btn { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; margin: 2px; font-weight: bold; }
-.btn-approve { background: #51cf66; color: #000; }
-.btn-reject { background: #ff6b6b; color: #fff; }
-.btn-ban { background: #ff922b; color: #000; }
-.btn-unban { background: #00ccff; color: #000; }
-.btn-edit { background: #9b59b6; color: #fff; }
-.btn-p1 { background: #ff6b6b; color: #fff; }
-.btn-p2 { background: #444; color: #fff; border: 1px solid #888; }
-.btn-refund { background: #ffd700; color: #000; }
-.btn-view { background: #9b59b6; color: #fff; }
-.status { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; display: inline-block; }
-.status-pending { background: #ffd700; color: #000; }
-.status-approved, .status-paid, .status-finished { background: #51cf66; color: #000; }
-.status-rejected, .status-declined { background: #ff6b6b; color: #fff; }
-.status-playing { background: #00ccff; color: #000; }
-.status-draw { background: #888; color: #fff; }
-.login-box { max-width: 400px; margin: 100px auto; background: #111; padding: 30px; border-radius: 15px; }
-input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; background: #222; color: #fff; }
-.hidden { display: none; }
-
-.tabs { display: flex; background: #111; border-radius: 10px; margin-bottom: 20px; border: 1px solid #00ffcc33; overflow: hidden; flex-wrap: wrap; }
-.tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; color: #888; font-weight: bold; background: #111; border: none; font-size: 13px; min-width: 120px; }
-.tab.active { color: #000; background: #00ffcc; }
-
-.user-layout { display: flex; gap: 20px; min-height: 500px; }
-.user-list { width: 300px; background: #0a0a0a; border-radius: 10px; overflow-y: auto; border: 1px solid #333; }
-.user-item { padding: 12px 15px; border-bottom: 1px solid #222; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-.user-item:hover, .user-item.active { background: #1a1a2e; }
-.user-item .u-name { font-weight: bold; color: #fff; font-size: 14px; }
-.user-item .u-coins { color: #ffd700; font-size: 12px; }
-.chat-area { flex: 1; background: #0a0a0a; border-radius: 10px; display: flex; flex-direction: column; border: 1px solid #333; }
-.chat-header { padding: 15px; border-bottom: 1px solid #333; font-weight: bold; color: #00ffcc; display: flex; justify-content: space-between; align-items: center; }
-.chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #000; border-radius: 0 0 10px 10px; }
-.msg-bubble { max-width: 75%; padding: 10px 14px; border-radius: 12px; font-size: 14px; word-wrap: break-word; }
-.msg-admin { background: #003d33; align-self: flex-end; border: 1px solid #00ffcc55; }
-.msg-user { background: #1a1a1a; align-self: flex-start; border: 1px solid #333; }
-.chat-input-area { padding: 15px; border-top: 1px solid #333; display: flex; gap: 10px; align-items: center; }
-.chat-input-area input[type="text"] { flex: 1; margin: 0; }
-.chat-input-area button { background: #00ffcc; color: #000; border: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; width: auto; }
-.chat-attach-btn { background: #222; color: #00ffcc; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 18px; border: 1px solid #00ffcc33; width: auto; margin: 0; display: flex; align-items: center; justify-content: center; }
-.chat-attach-btn input { display: none; }
-.empty-state { color: #555; text-align: center; margin-top: 40px; }
-.btn-small { border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; margin-top: 5px; margin-left: 4px; }
-
-.online-dot { width:9px; height:9px; background:#51cf66; border-radius:50%; display:inline-block; margin-right:6px; box-shadow:0 0 5px #51cf66; animation:pulse 2s infinite; }
-.offline-dot { width:9px; height:9px; background:#444; border-radius:50%; display:inline-block; margin-right:6px; }
-.banned-text { color: #ff6b6b; text-decoration: line-through; }
-@keyframes pulse {0%{box-shadow:0 0 0 0 #51cf6699}70%{box-shadow:0 0 0 6px #51cf6600}100%{box-shadow:0 0 0 0 #51cf6600}}
-
-/* ===== LIVE BOARD MODAL ===== */
-.modal-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); z-index: 9999; align-items: center; justify-content: center; padding: 20px; }
-.modal-content { background: #111; padding: 20px; border-radius: 15px; border: 1px solid #00ffcc44; max-width: 500px; width: 100%; text-align: center; }
-.modal-board { display: grid; grid-template-columns: repeat(8, 1fr); border: 3px solid #00ffcc; border-radius: 5px; overflow: hidden; aspect-ratio: 1; max-width: 360px; margin: 15px auto; }
-.modal-sq { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; }
-.modal-sq.dark { background: #1a1a1a; }
-.modal-sq.light { background: #e0e0e0; }
-.modal-piece { width: 70%; height: 70%; border-radius: 50%; border: 2px solid #888; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #ffd700; }
-.modal-piece.p1 { background: radial-gradient(circle, #ff6b6b, #c92a2a); }
-.modal-piece.p2 { background: radial-gradient(circle, #444, #000); }
-.modal-piece.king::after { content: '♔'; }
-
-@media (max-width: 768px) {
-  .user-layout { flex-direction: column; }
-  .user-list { width: 100%; max-height: 250px; }
-  th, td { padding: 8px; font-size: 10px; }
-  .tab { padding: 10px; font-size: 11px; }
-}
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    body {
+        background: #0b0f19;
+        background: linear-gradient(180deg, #0b0f19 0%, #111827 100%);
+        color: #ffffff;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+    main {
+        width: 100%;
+        max-width: 480px;
+        text-align: center;
+        padding: 40px 24px;
+    }
+    h1 {
+        font-size: clamp(2rem, 6vw, 2.75rem);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin-bottom: 12px;
+        color: #f9fafb;
+    }
+    .subtitle {
+        color: #9ca3af;
+        font-size: 1rem;
+        margin-bottom: 40px;
+        line-height: 1.5;
+    }
+    #watchBtn {
+        background: #22c55e;
+        color: white;
+        border: none;
+        padding: 20px 48px;
+        font-size: 1.25rem;
+        font-weight: 600;
+        border-radius: 16px;
+        cursor: pointer;
+        width: 100%;
+        max-width: 300px;
+        box-shadow: 0 10px 25px -5px rgba(34, 197, 94, 0.3), 0 4px 10px -2px rgba(34, 197, 94, 0.2);
+        transition: all 0.2s ease;
+        -webkit-tap-highlight-color: transparent;
+        position: relative;
+        overflow: hidden;
+    }
+    #watchBtn:hover {
+        background: #16a34a;
+        transform: translateY(-2px);
+        box-shadow: 0 15px 30px -5px rgba(34, 197, 94, 0.4), 0 6px 12px -2px rgba(34, 197, 94, 0.3);
+    }
+    #watchBtn:active {
+        transform: translateY(0);
+        box-shadow: 0 5px 15px -5px rgba(34, 197, 94, 0.3);
+    }
+    #watchBtn:disabled {
+        background: #374151;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+        opacity: 0.7;
+    }
+    #status {
+        margin-top: 24px;
+        min-height: 24px;
+        color: #9ca3af;
+        font-size: 0.9rem;
+    }
+    .icon {
+        display: inline-block;
+        margin-right: 8px;
+        vertical-align: middle;
+    }
+    #videoContainer {
+        display: none;
+        margin-top: 32px;
+    }
+    .video-wrap {
+        opacity: 0;
+        transform: translateY(12px);
+        transition: all 0.4s ease;
+    }
+    .video-wrap.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    .video-placeholder {
+        position: relative;
+        background: #000;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px -10px rgba(0,0,0,0.6);
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+    .video-placeholder video {
+        width: 100%;
+        display: block;
+        aspect-ratio: 16 / 9;
+        background: #000;
+    }
+    .video-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #e5e7eb;
+        font-size: 0.95rem;
+        background: rgba(17,24,39,0.8);
+        padding: 10px 16px;
+        border-radius: 10px;
+        pointer-events: none;
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(255,255,255,0.1);
+        white-space: nowrap;
+    }
+    .note {
+        margin-top: 48px;
+        color: #6b7280;
+        font-size: 0.8rem;
+        line-height: 1.5;
+        padding: 0 8px;
+    }
+    @media (max-width: 390px) {
+        main {
+            padding: 32px 16px;
+        }
+        h1 {
+            margin-bottom: 10px;
+        }
+        #watchBtn {
+            padding: 18px 36px;
+            font-size: 1.125rem;
+            max-width: none;
+        }
+        .video-text {
+            font-size: 0.85rem;
+            padding: 8px 12px;
+        }
+    }
 </style>
 </head>
 <body>
+    <main>
+        <h1>Click to Watch</h1>
+        <p class="subtitle">Tap the button below to continue</p>
+        <button id="watchBtn" aria-label="Watch Now">
+            <span class="icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: -3px;">
+                    <path d="M8 5.14v14l11-7-11-7z"/>
+                </svg>
+            </span>
+            Watch Now
+        </button>
+        <p id="status"></p>
 
-<div id="loginScreen" class="login-box">
-  <h2 style="color:#00ffcc;text-align:center;margin-bottom:20px;">🔐 Admin Login</h2>
-  <input type="password" id="passwordInput" placeholder="Enter admin password" onkeypress="if(event.key==='Enter')login()">
-  <button onclick="login()" style="width:100%;padding:12px;background:linear-gradient(45deg,#00ffcc,#00ccff);border:none;border-radius:8px;color:#000;font-weight:bold;cursor:pointer;">Login</button>
-  <p id="loginError" style="color:#ff6b6b;margin-top:10px;text-align:center;"></p>
-</div>
-
-<div id="adminPanel" class="hidden">
-  <div class="container">
-    <div class="header">
-      <div><span style="background:#00ffcc;color:#000;padding:5px 10px;border-radius:5px;font-weight:bold;">AG</span> <strong>ADMIN PANEL</strong></div>
-      <button onclick="logout()" style="background:#ff6b6b;color:#fff;border:none;padding:8px 15px;border-radius:6px;cursor:pointer;">Logout</button>
-    </div>
-
-    <div class="card" style="display:flex; justify-content:space-around; text-align:center; padding:15px; margin-bottom:20px; flex-wrap: wrap; gap: 10px;">
-      <div><div style="font-size:11px;color:#888;">USERS</div><div id="totalUsers" style="font-size:22px;color:#00ffcc;font-weight:bold;">0</div></div>
-      <div><div style="font-size:11px;color:#888;">ONLINE</div><div id="onlineUsers" style="font-size:22px;color:#51cf66;font-weight:bold;">0</div></div>
-      <div><div style="font-size:11px;color:#888;">PENDING DEPOSITS</div><div id="pendingDeposits" style="font-size:22px;color:#ffd700;font-weight:bold;">0</div></div>
-      <div><div style="font-size:11px;color:#888;">PENDING WITHDRAWALS</div><div id="pendingCount" style="font-size:22px;color:#ffd700;font-weight:bold;">0</div></div>
-      <div><div style="font-size:11px;color:#888;">ACTIVE MATCHES</div><div id="activeMatches" style="font-size:22px;color:#00ccff;font-weight:bold;">0</div></div>
-    </div>
-
-    <div class="tabs">
-      <button class="tab active" onclick="switchTab('deposits')">💰 Deposits</button>
-      <button class="tab" onclick="switchTab('withdrawals')">💸 Withdrawals</button>
-      <button class="tab" onclick="switchTab('pvp')">♟️ PvP Matches</button>
-      <button class="tab" onclick="switchTab('chat')">💬 Users & Chat</button>
-    </div>
-
-    <!-- DEPOSITS TAB -->
-    <div id="depositsTab" class="card">
-      <h3>Deposit Requests</h3>
-      <div style="overflow-x:auto;">
-      <table>
-        <thead><tr><th>USER</th><th>MWK</th><th>TX ID</th><th>DATE</th><th>STATUS</th><th>ACTIONS</th></tr></thead>
-        <tbody id="depositBody"></tbody>
-      </table>
-      </div>
-    </div>
-
-    <!-- WITHDRAWALS TAB -->
-    <div id="withdrawalsTab" class="card hidden">
-      <h3>Withdrawal Queue</h3>
-      <div style="overflow-x:auto;">
-      <table>
-        <thead><tr><th>USER</th><th>MWK</th><th>PHONE</th><th>NETWORK</th><th>DATE</th><th>STATUS</th><th>ACTIONS</th></tr></thead>
-        <tbody id="withdrawalBody"></tbody>
-      </table>
-      </div>
-    </div>
-
-    <!-- PVP MATCHES TAB -->
-    <div id="pvpTab" class="card hidden">
-      <h3>♟️ PvP Match History & Control</h3>
-      <p style="font-size:12px;color:#888;margin-bottom:15px">View live boards, force winners, or refund stuck matches.</p>
-      <div style="overflow-x:auto;">
-      <table>
-        <thead><tr><th>ID</th><th>P1 (🔴)</th><th>P2 (⚫)</th><th>STAKE</th><th>STATUS</th><th>WINNER</th><th>ACTIONS</th></tr></thead>
-        <tbody id="pvpBody"></tbody>
-      </table>
-      </div>
-    </div>
-
-    <!-- CHAT TAB -->
-    <div id="chatTab" class="hidden">
-      <div class="user-layout">
-        <div class="user-list" id="usersListPanel">
-          <div style="padding:15px;color:#888;text-align:center">Loading users...</div>
+        <div id="videoContainer" class="video-wrap">
+            <div class="video-placeholder">
+                <video controls playsinline poster="">
+                    <source src="" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <p class="video-text">Your video will play here</p>
+            </div>
         </div>
-        <div class="chat-area">
-          <div class="chat-header" id="chatHeader"><span>Select a user to chat</span></div>
-          <div class="chat-messages" id="chatMessages"><div class="empty-state">Select a user from the left to view and send messages</div></div>
-          <div class="chat-input-area">
-            <label class="chat-attach-btn">📎<input type="file" id="adminFileInput" accept="image/*" onchange="handleAdminFileUpload(event)"></label>
-            <input type="text" id="adminMsgInput" placeholder="Type message..." disabled>
-            <button onclick="sendAdminMsg()" id="adminSendBtn" disabled>Send</button>
-          </div>
-        </div>
-      </div>
-    </div>
 
-  </div>
-</div>
-
-<!-- ===== LIVE BOARD MODAL ===== -->
-<div id="boardModal" class="modal-overlay">
-  <div class="modal-content">
-    <h3 style="color:#00ffcc; margin-bottom:5px;">♟️ Live Match View</h3>
-    <div id="modalGameInfo" style="font-size:12px; color:#ccc; margin-bottom:10px;"></div>
-    <div id="modalBoardContainer" class="modal-board"></div>
-    <div id="modalDrawInfo" style="font-size:13px; color:#ffd700; margin-top:10px; font-weight:bold;"></div>
-    <br>
-    <button onclick="closeBoardModal()" style="background:#333; color:#fff; padding:10px 30px; border:1px solid #00ffcc44; border-radius:8px; cursor:pointer;">Close</button>
-  </div>
-</div>
+        <p class="note">If ad doesn't appear, host this file on HTTPS (GitHub Pages) – ads don't work on file://</p>
+    </main>
 
 <script>
-const ADMIN_PASSWORD = "mada2026"; 
-const ADMIN_NAME = "Admin_Mada";
-let currentChatUser = null;
-let cachedUsers = {};
+    (function() {
+        const btn = document.getElementById('watchBtn');
+        const status = document.getElementById('status');
+        const videoContainer = document.getElementById('videoContainer');
+        let scriptLoaded = false;
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBRDfT-P8wzVAAZs8lveF1-ZTf8QlpRC5g",
-  authDomain: "apple-green-ded09.firebaseapp.com",
-  databaseURL: "https://apple-green-ded09-default-rtdb.firebaseio.com",
-  projectId: "apple-green-ded09",
-  storageBucket: "apple-green-ded09.firebasestorage.app",
-  messagingSenderId: "1093712798003",
-  appId: "1:1093712798003:web:2a945cd7fc76641dab5e46"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-function login() {
-  const pass = document.getElementById("passwordInput").value;
-  if (pass === ADMIN_PASSWORD) {
-    localStorage.setItem("adminAuth", "true");
-    document.getElementById("loginScreen").classList.add("hidden");
-    document.getElementById("adminPanel").classList.remove("hidden");
-    initAdmin();
-  } else {
-    document.getElementById("loginError").innerText = "Wrong password";
-  }
-}
-
-function logout() { localStorage.removeItem("adminAuth"); location.reload(); }
-
-function switchTab(tab) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('depositsTab').classList.add('hidden');
-  document.getElementById('withdrawalsTab').classList.add('hidden');
-  document.getElementById('pvpTab').classList.add('hidden');
-  document.getElementById('chatTab').classList.add('hidden');
-  
-  if(tab === 'deposits') { document.getElementById('depositsTab').classList.remove('hidden'); event.target.classList.add('active'); }
-  else if(tab === 'withdrawals') { document.getElementById('withdrawalsTab').classList.remove('hidden'); event.target.classList.add('active'); }
-  else if(tab === 'pvp') { document.getElementById('pvpTab').classList.remove('hidden'); event.target.classList.add('active'); }
-  else { document.getElementById('chatTab').classList.remove('hidden'); event.target.classList.add('active'); }
-}
-
-// --- DEPOSITS ---
-function loadDeposits() {
-  db.ref('deposit_requests').on('value', (snap) => {
-    const tbody = document.getElementById("depositBody");
-    tbody.innerHTML = "";
-    let pending = 0;
-    snap.forEach((child) => {
-      const id = child.key;
-      const d = child.val();
-      const status = d.status || "pending";
-      if(status === 'pending') pending++;
-      const statusClass = status === 'approved' ? 'status-approved' : status === 'declined' ? 'status-declined' : 'status-pending';
-      
-      // Default 1 MWK = 1 Coin if coinsRequested is missing
-      const coinsToCredit = d.coinsRequested || d.amountMWK; 
-      
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${d.uid}</td>
-        <td>${d.amountMWK}</td>
-        <td style="color:#00ffcc">${d.txId || 'N/A'}</td>
-        <td>${new Date(d.timestamp).toLocaleString()}</td>
-        <td><span class="status ${statusClass}">${status}</span></td>
-        <td>
-          ${status === 'pending' ? `
-            <button class="btn btn-approve" onclick="approveDeposit('${id}','${d.uid}',${coinsToCredit})">Approve</button>
-            <button class="btn btn-reject" onclick="declineDeposit('${id}')">Decline</button>
-          ` : '-'}
-        </td>`;
-      tbody.appendChild(tr);
-    });
-    document.getElementById('pendingDeposits').innerText = pending;
-  });
-}
-
-function approveDeposit(id, uid, coins) {
-  if (!confirm(`Add ${coins} coins to ${uid}?`)) return;
-  db.ref('leaderboard_all/' + uid + '/coins').once('value', snap => {
-    const current = snap.val() || 0;
-    db.ref('leaderboard_all/' + uid).update({ coins: current + coins });
-    db.ref('deposit_requests/' + id).update({ status: 'approved' });
-    alert(`Approved! ${coins} coins added to ${uid}.`);
-  });
-}
-
-function declineDeposit(id) {
-  if (!confirm('Decline this deposit?')) return;
-  db.ref('deposit_requests/' + id).update({ status: 'declined' });
-}
-
-// --- WITHDRAWALS ---
-function loadWithdrawals() {
-  db.ref('withdraw_requests').on('value', (snap) => {
-    const tbody = document.getElementById("withdrawalBody");
-    tbody.innerHTML = "";
-    let pending = 0;
-    snap.forEach((child) => {
-      const id = child.key;
-      const w = child.val();
-      const status = w.status || "pending";
-      if(status === 'pending') pending++;
-      const statusClass = status === 'approved' ? 'status-approved' : status === 'declined' ? 'status-declined' : 'status-pending';
-      
-      const userData = cachedUsers[w.uid] || {};
-      const phone = userData.phone || 'N/A';
-      const network = userData.network || 'N/A';
-      const withdrawMWK = w.amountMWK || w.mwk || 0;
-      const deductCoins = w.coins || withdrawMWK; // Fallback logic
-
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${w.uid}</td>
-        <td>MWK ${withdrawMWK}</td>
-        <td>${phone}</td>
-        <td>${network}</td>
-        <td>${new Date(w.timestamp).toLocaleString()}</td>
-        <td><span class="status ${statusClass}">${status}</span></td>
-        <td>
-          ${status === 'pending' ? `
-            <button class="btn btn-approve" onclick="approveWithdrawal('${id}','${w.uid}',${deductCoins})">Approve</button>
-            <button class="btn btn-reject" onclick="rejectWithdrawal('${id}','${w.uid}',${deductCoins})">Reject</button>
-          ` : '-'}
-          <button class="btn btn-ban" onclick="banUser('${w.uid}')">Ban</button>
-        </td>`;
-      tbody.appendChild(tr);
-    });
-    document.getElementById('pendingCount').innerText = pending;
-  });
-}
-
-function approveWithdrawal(id, uid, coins) {
-  if (!confirm(`Approve withdrawal for ${uid}? Make sure you sent the money!`)) return;
-  db.ref('withdraw_requests/' + id).update({ status: 'approved' });
-  alert(`Marked as Paid!`);
-}
-
-function rejectWithdrawal(id, uid, coins) {
-  if (!confirm(`Reject and refund ${coins} coins to ${uid}?`)) return;
-  db.ref('leaderboard_all/' + uid + '/coins').once('value', (snap) => {
-    const current = snap.val() || 0;
-    db.ref('leaderboard_all/' + uid).update({ coins: current + coins });
-    db.ref('withdraw_requests/' + id).update({ status: 'declined' });
-    alert(`Rejected. ${coins} coins refunded to ${uid}.`);
-  });
-}
-
-// --- PVP MATCHES & LIVE BOARD ---
-function loadPvPGames() {
-  db.ref('pvp_games').on('value', (snap) => {
-    const tbody = document.getElementById("pvpBody");
-    tbody.innerHTML = "";
-    let active = 0;
-    
-    var games = [];
-    snap.forEach(c => { games.push({ id: c.key, ...c.val() }); });
-    games.sort((a, b) => (b.created || 0) - (a.created || 0)); // Newest first
-
-    games.forEach(g => {
-      if(g.status === 'playing') active++;
-      const statusClass = g.status === 'playing' ? 'status-playing' : (g.winner === 'draw' ? 'status-draw' : 'status-finished');
-      const shortId = g.id.substring(g.id.length - 6);
-      
-      let winnerText = '-';
-      if (g.winner === 'draw') winnerText = '🤝 Draw/Refund';
-      else if (g.winner) winnerText = g.winner === g.p1 ? `🔴 P1 (${g.p1})` : `⚫ P2 (${g.p2})`;
-
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td style="font-family:monospace;color:#888">${shortId}</td>
-        <td>🔴 ${g.p1}</td>
-        <td>⚫ ${g.p2}</td>
-        <td>MWK ${g.entryMWK || 0}</td>
-        <td><span class="status ${statusClass}">${g.status}${g.winner === 'draw' ? ' (Draw)' : ''}</span></td>
-        <td style="color:#51cf66;font-weight:bold">${winnerText}</td>
-        <td>
-          ${g.status === 'playing' ? `
-            <button class="btn btn-view" onclick="viewPvPBoard('${g.id}')">👁️ View</button>
-            <button class="btn btn-p1" onclick="forceWinPvP('${g.id}','${g.p1}','${g.p2}',${g.winMWK || 0})">P1 Wins</button>
-            <button class="btn btn-p2" onclick="forceWinPvP('${g.id}','${g.p2}','${g.p1}',${g.winMWK || 0})">P2 Wins</button>
-            <button class="btn btn-refund" onclick="refundPvP('${g.id}','${g.p1}','${g.p2}',${g.entryMWK || 0})">Refund Both</button>
-          ` : `
-            <button class="btn btn-view" onclick="viewPvPBoard('${g.id}')" style="background:#333;color:#fff">👁️ View</button>
-          `}
-        </td>`;
-      tbody.appendChild(tr);
-    });
-    document.getElementById('activeMatches').innerText = active;
-  });
-}
-
-// VIEW LIVE BOARD
-function viewPvPBoard(gameId) {
-  db.ref('pvp_games/' + gameId).once('value', function(snap) {
-    var game = snap.val();
-    if (!game) { alert('Game not found'); return; }
-    
-    var board = game.board || [];
-    var turnText = game.turn === 1 ? '🔴 P1 Turn' : '⚫ P2 Turn';
-    if (game.status !== 'playing') turnText = '🏁 Game Over';
-    
-    document.getElementById('modalGameInfo').innerText = `🔴 ${game.p1} vs ⚫ ${game.p2} | Stake: MWK ${game.entryMWK} | ${turnText}`;
-    
-    var drawInfo = document.getElementById('modalDrawInfo');
-    if (game.drawTargetPlayer && game.drawCounter > 0) {
-      var movesLeft = 12 - game.drawCounter;
-      var lonePlayer = game.drawTargetPlayer === 1 ? game.p1 : game.p2;
-      drawInfo.innerText = '⏱️ ' + lonePlayer + ' has 1 piece! Draw in ' + movesLeft + ' moves';
-      drawInfo.style.display = 'block';
-    } else {
-      drawInfo.style.display = 'none';
-    }
-
-    var html = '';
-    for (var i = 0; i < 64; i++) {
-      var r = Math.floor(i / 8); var c = i % 8;
-      var isDark = (r + c) % 2 === 1;
-      var p = board[i];
-      html += `<div class="modal-sq ${isDark?'dark':'light'}">`;
-      if (p !== 0) {
-        html += `<div class="modal-piece ${p > 0 ? 'p1' : 'p2'} ${Math.abs(p) === 2 ? 'king' : ''}"></div>`;
-      }
-      html += '</div>';
-    }
-    document.getElementById('modalBoardContainer').innerHTML = html;
-    document.getElementById('boardModal').style.display = 'flex';
-  });
-}
-
-function closeBoardModal() { document.getElementById('boardModal').style.display = 'none'; }
-
-// Force Win Logic (Fix: correctly use winMWK and update stats properly)
-function forceWinPvP(gameId, winnerUid, loserUid, winMWK) {
-  if (!confirm(`Force ${winnerUid} to WIN and credit MWK ${winMWK}?`)) return;
-  
-  var updates = {};
-  updates['pvp_games/' + gameId + '/status'] = 'finished';
-  updates['pvp_games/' + gameId + '/winner'] = winnerUid;
-
-  db.ref('leaderboard_all/' + winnerUid).once('value', wSnap => {
-    var wData = wSnap.val() || {};
-    updates['leaderboard_all/' + winnerUid + '/coins'] = (wData.coins || 0) + winMWK;
-    updates['leaderboard_all/' + winnerUid + '/gamesPlayed'] = (wData.gamesPlayed || 0) + 1;
-    updates['leaderboard_all/' + winnerUid + '/gamesWon'] = (wData.gamesWon || 0) + 1;
-
-    db.ref('leaderboard_all/' + loserUid).once('value', lSnap => {
-      var lData = lSnap.val() || {};
-      updates['leaderboard_all/' + loserUid + '/gamesPlayed'] = (lData.gamesPlayed || 0) + 1;
-      updates['leaderboard_all/' + loserUid + '/gamesLost'] = (lData.gamesLost || 0) + 1;
-
-      db.ref().update(updates).then(() => alert('Match resolved! Winner credited.')).catch(e => alert('Error: '+e.message));
-    });
-  });
-}
-
-// Refund Logic (Fix: correctly use entryMWK directly, not entryMWK * 50)
-function refundPvP(gameId, p1, p2, entryMWK) {
-  if (!confirm(`CANCEL match and refund both players MWK ${entryMWK}?`)) return;
-  var updates = {};
-  updates['pvp_games/' + gameId + '/status'] = 'finished';
-  updates['pvp_games/' + gameId + '/winner'] = 'draw'; // Mark as draw/refund
-
-  db.ref('leaderboard_all/' + p1 + '/coins').once('value', p1Snap => {
-    updates['leaderboard_all/' + p1 + '/coins'] = (p1Snap.val() || 0) + entryMWK;
-    db.ref('leaderboard_all/' + p2 + '/coins').once('value', p2Snap => {
-      updates['leaderboard_all/' + p2 + '/coins'] = (p2Snap.val() || 0) + entryMWK;
-      db.ref().update(updates).then(() => alert('Match cancelled! Both refunded.')).catch(e => alert('Error: '+e.message));
-    });
-  });
-}
-
-// --- USERS, BAN & CHAT ---
-function banUser(username) { if (!confirm(`BAN ${username}?`)) return; db.ref('leaderboard_all/' + username).update({ banned: true }); alert(`${username} banned.`); }
-function unbanUser(username) { if (!confirm(`UNBAN ${username}?`)) return; db.ref('leaderboard_all/' + username).update({ banned: false }); alert(`${username} unbanned.`); }
-function editCoins(username) { const newCoins = prompt(`Enter NEW coin balance for ${username}:`); if (newCoins !== null && !isNaN(newCoins)) { db.ref('leaderboard_all/' + username).update({ coins: parseInt(newCoins) }); alert(`Coins updated.`); } }
-
-function updateOnlineCount() { const count = document.querySelectorAll('.online-dot').length; document.getElementById('onlineUsers').innerText = count; }
-
-function loadUsers() {
-  db.ref('leaderboard_all').on('value', snap => {
-    cachedUsers = {};
-    const users = [];
-    snap.forEach(c => {
-      if(c.key !== ADMIN_NAME) {
-        var d = c.val() || {};
-        cachedUsers[c.key] = d;
-        users.push({ name: c.key, coins: d.coins || 0, banned: d.banned || false });
-      }
-    });
-    users.sort((a, b) => b.coins - a.coins);
-    document.getElementById('totalUsers').innerText = users.length;
-    
-    let html = '';
-    users.forEach(u => {
-      const nameClass = u.banned ? 'u-name banned-text' : 'u-name';
-      const banBtn = u.banned 
-        ? `<button class="btn-small btn-unban" onclick="event.stopPropagation(); unbanUser('${u.name}')">Unban</button>`
-        : `<button class="btn-small btn-ban" onclick="event.stopPropagation(); banUser('${u.name}')">Ban</button>`;
-      html += `
-        <div class="user-item" id="u-${u.name}" onclick="openAdminChat('${u.name}')">
-          <div>
-            <div class="${nameClass}"><span class="offline-dot" id="dot-${u.name}"></span>${u.name} ${u.banned ? '🚫' : ''}</div>
-            <div class="u-coins">${u.coins.toLocaleString()} 🪙</div>
-          </div>
-          <div>
-            <button class="btn-small btn-edit" onclick="event.stopPropagation(); editCoins('${u.name}')">✏️</button>
-            ${banBtn}
-          </div>
-        </div>`;
-    });
-    document.getElementById('usersListPanel').innerHTML = html || '<div class="empty-state">No users found</div>';
-    
-    users.forEach(u => {
-      db.ref('online_status/' + u.name).on('value', psnap => {
-        const dot = document.getElementById('dot-' + u.name);
-        if(dot) {
-          const sd = psnap.val();
-          dot.className = (sd && sd.online) ? 'online-dot' : 'offline-dot';
-          updateOnlineCount();
+        function showVideo() {
+            videoContainer.style.display = 'block';
+            setTimeout(() => {
+                videoContainer.classList.add('show');
+            }, 10);
         }
-      });
-    });
-  });
-}
 
-function openAdminChat(username) {
-  currentChatUser = username;
-  document.getElementById('chatHeader').innerHTML = `<span>Chatting with: ${username}</span>`;
-  document.getElementById('adminMsgInput').disabled = false;
-  document.getElementById('adminSendBtn').disabled = false;
-  document.querySelectorAll('.user-item').forEach(el => el.classList.remove('active'));
-  const userEl = document.getElementById('u-' + username);
-  if(userEl) userEl.classList.add('active');
-  
-  const chatId = [ADMIN_NAME, username].sort().join('_');
-  db.ref('chats/' + chatId + '/messages').off(); 
-  db.ref('chats/' + chatId + '/messages').orderByChild('timestamp').limitToLast(100).on('value', snap => {
-    let html = '';
-    snap.forEach(c => {
-      const m = c.val();
-      const isMe = m.from === ADMIN_NAME;
-      const time = new Date(m.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-      let content = escapeHtml(m.text || '');
-      if(m.image) content += `<img src="${m.image}" style="max-width:150px;border-radius:5px;display:block;margin-top:5px;cursor:pointer" onclick="window.open(this.src)">`;
-      if(m.audio) content += `<audio controls src="${m.audio}" style="height:30px;width:150px;margin-top:5px"></audio>`;
-      if(m.fileData) content += `<a href="${m.fileData}" download style="color:#00ccff; font-size:12px; display:inline-block; margin-top:5px;">📎 ${escapeHtml(m.fileName || 'File')}</a>`;
-      
-      html += `
-        <div class="msg-bubble ${isMe ? 'msg-admin' : 'msg-user'}">
-          ${content}
-          <div style="font-size:10px;color:#888;margin-top:4px;text-align:right">${time}</div>
-        </div>`;
-      if(!isMe && !m.read) db.ref('chats/' + chatId + '/messages/' + c.key).update({read: true});
-    });
-    const msgArea = document.getElementById('chatMessages');
-    msgArea.innerHTML = html || '<div class="empty-state">No messages yet.</div>';
-    msgArea.scrollTop = msgArea.scrollHeight;
-  });
-}
+        btn.addEventListener('click', function() {
+            if (scriptLoaded) {
+                showVideo();
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.innerHTML = 'Loading Ad...';
+            status.textContent = '';
 
-function sendAdminMsg() {
-  const input = document.getElementById('adminMsgInput');
-  const text = input.value.trim();
-  if(!text || !currentChatUser) return;
-  const chatId = [ADMIN_NAME, currentChatUser].sort().join('_');
-  db.ref('chats/' + chatId + '/messages').push({ from: ADMIN_NAME, text: text, timestamp: Date.now(), read: false }).then(() => input.value = '');
-}
+            const socialBarUrl = 'https://pl29281398.effectivecpmnetwork.com/29/5a/a8/295aa8c04e3cb528d2b04a0d06b737fa.js';
 
-// FEATURE 1: Admin File Upload to Chat
-function handleAdminFileUpload(e) {
-  var file = e.target.files && e.target.files[0];
-  if (!file || !currentChatUser) return;
-  var chatId = [ADMIN_NAME, currentChatUser].sort().join('_');
-  var isImage = file.type.startsWith('image/');
-  
-  var reader = new FileReader();
-  reader.onload = function(ev) {
-    if (isImage) {
-      var img = new Image();
-      img.onload = function() {
-        var c = document.createElement('canvas');
-        var w=600, h=600, iw=img.width, ih=img.height;
-        if(iw>w){ih*=w/iw;iw=w;} if(ih>h){iw*=h/ih;ih=h;}
-        c.width=Math.round(iw); c.height=Math.round(ih);
-        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-        var base64 = c.toDataURL('image/jpeg', 0.5);
-        db.ref('chats/' + chatId + '/messages').push({ from: ADMIN_NAME, image: base64, timestamp: Date.now(), read: false });
-      };
-      img.src = ev.target.result;
-    } else {
-      if (file.size > 1024 * 1024) {
-        alert("File size must be less than 1MB."); e.target.value = ''; return;
-      }
-      db.ref('chats/' + chatId + '/messages').push({ from: ADMIN_NAME, fileData: ev.target.result, fileName: file.name, timestamp: Date.now(), read: false });
-    }
-  };
-  reader.readAsDataURL(file);
-  e.target.value = ''; // reset input
-}
+            try {
+                const script = document.createElement('script');
+                script.type = 'text/javascript';
+                script.async = true;
+                script.src = socialBarUrl;
 
-function escapeHtml(t) { var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+                script.onload = function() {
+                    scriptLoaded = true;
+                    btn.disabled = false;
+                    btn.innerHTML = '<span class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: -3px;"><path d="M8 5.14v14l11-7-11-7z"/></svg></span>Watch Video';
+                    status.textContent = '';
+                    showVideo();
+                };
 
-document.getElementById('adminMsgInput').addEventListener('keypress', function(e) { if(e.key === 'Enter') sendAdminMsg(); });
+                script.onerror = function() {
+                    status.textContent = 'Failed to load. Please check your connection and try again.';
+                    btn.innerHTML = '<span class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: -3px;"><path d="M8 5.14v14l11-7-11-7z"/></svg></span>Try Again';
+                    btn.disabled = false;
+                };
 
-function initAdmin() { loadDeposits(); loadWithdrawals(); loadPvPGames(); loadUsers(); }
+                document.body.appendChild(script);
 
-window.onload = function() {
-  if (localStorage.getItem("adminAuth") === "true") {
-    document.getElementById("loginScreen").classList.add("hidden");
-    document.getElementById("adminPanel").classList.remove("hidden");
-    initAdmin();
-  }
-}
+            } catch (e) {
+                status.textContent = 'Error loading ad.';
+                btn.disabled = false;
+                btn.innerHTML = '<span class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: -3px;"><path d="M8 5.14v14l11-7-11-7z"/></svg></span>Watch Now';
+            }
+        });
+    })();
 </script>
+<script>(function(){document.addEventListener("click",function(e){var a=e.target.closest("[data-product-id]");if(!a)return;e.preventDefault();var pid=a.getAttribute("data-product-id");if(pid)parent.postMessage({type:"ecto-artifact-link-click",productId:pid},"*")})})();</script>
 </body>
-																																					 </html>
+</html> 
