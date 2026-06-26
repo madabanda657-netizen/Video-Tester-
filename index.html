@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+here<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
@@ -7,13 +7,14 @@
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check-compat.js"></script>
 <script src="https://www.google.com/recaptcha/api.js?render=6LeoB_8sAAAAAJS4kepjICEYny7besSCK4mv3l9Q"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script src="https://js.median.dev/median.js"></script>
 
-<!-- AD NETWORK SCRIPTS -->
-<script src="https://quge5.com/88/tag.min.js" data-zone="253203" async data-cfasync="false"></script>
+<!-- ADSTERRA SOCIAL BAR -->
+<script src="https://pl29281398.effectivecpmnetwork.com/29/5a/a8/295aa8c04e3cb528d2b04a0d06b737fa.js"></script>
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;background:#000;color:#fff;text-align:center;overflow-x:hidden}.container{padding:20px;max-width:600px;margin:0 auto;padding-bottom:80px}.card{background:#111;padding:20px;margin:15px 0;border-radius:15px;box-shadow:0 0 20px #00ffcc55;border:1px solid #00ffcc33}input,select,button{padding:12px;margin:8px 0;border-radius:10px;border:none;width:100%;font-size:16px}button{background:linear-gradient(45deg,#00ffcc,#00ccff);font-weight:bold;color:#000;cursor:pointer}h1{color:#00ffcc;margin-bottom:10px;font-size:28px}h3{color:#00ccff;margin-bottom:10px}.success{color:#51cf66}.error{color:#ff6b6b}.nav{position:fixed;bottom:0;left:0;right:0;background:#111;display:none;justify-content:space-around;padding:10px 0 12px;box-shadow:0 -2px 10px #00ffcc44;z-index:100}.nav-btn{background:transparent;border:1px solid transparent;color:#888;padding:6px 2px;margin:0;width:auto;font-size:10px;display:flex;flex-direction:column;align-items:center;gap:3px}.nav-btn .nav-icon{font-size:18px}.nav-btn.active{color:#00ffcc;border-color:transparent;text-shadow:0 0 10px #00ffcc}.page{display:none}.page.active{display:block}.flex-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:14px;color:#ccc}
@@ -59,7 +60,7 @@
 .wa-float{position:fixed;bottom:80px;right:15px;width:55px;height:55px;background:#25d366;border-radius:50%;display:none;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(37,211,102,.4);z-index:99;text-decoration:none}.wa-float:hover{transform:scale(1.1)}.wa-float svg{width:28px;height:28px;fill:#fff}
 .inbox-item { padding: 10px; border-radius: 10px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 5px; }
 .inbox-meta { font-size: 10px; color: #888; display: flex; justify-content: space-between; }
-.inbox-file { background: #1a1a2e; padding: 6px 12px; border-radius:8px; color: #00ccff; font-size: 13px; text-decoration: none; display: inline-block; margin-top: 5px; border: 1px solid #00ccff33; }
+.inbox-file { background: #1a1a2e; padding: 6px 12px; border-radius: 8px; color: #00ccff; font-size: 13px; text-decoration: none; display: inline-block; margin-top: 5px; border: 1px solid #00ccff33; }
 .inbox-img { max-width: 100%; max-height: 150px; border-radius: 8px; margin-top: 5px; cursor: pointer; }
 .notification-dot { width: 8px; height: 8px; background: #ff6b6b; border-radius: 50%; display: inline-block; vertical-align: middle; margin-left: 4px; }
 .profile-pic-container { position: relative; width: 120px; height: 120px; border-radius: 50%; overflow: hidden; cursor: pointer; border: 3px solid #00ffcc; box-shadow: 0 0 15px #00ffcc55; margin: 0 auto; background: #1a1a2e; }
@@ -91,7 +92,7 @@
 .chat-messages-box { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 8px; background: #050508; border-radius: 12px; border: 1px solid #1a1a1a; width: 100%; -webkit-overflow-scrolling: touch; }
 .chat-back-btn{width:auto;padding:8px 14px;background:#1a1a1a;color:#00ffcc;border:1px solid #00ffcc44;border-radius:10px;cursor:pointer;font-size:14px;flex-shrink:0;margin:0}
 #imageViewerModal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.97); z-index: 10002; flex-direction: column; align-items: center; justify-content: center; padding: 10px; }
-#imageViewerModal .iv-top-bar { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content:space-between; align-items: center; padding: 12px 15px; background: linear-gradient(180deg, rgba(0,0,0,0.8), transparent); z-index: 3; }
+#imageViewerModal .iv-top-bar { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: linear-gradient(180deg, rgba(0,0,0,0.8), transparent); z-index: 3; }
 #imageViewerModal .iv-img-wrap { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; min-height: 0; overflow: auto; -webkit-overflow-scrolling: touch; }
 #imageViewerModal img { max-width: 100%; max-height: 80vh; object-fit: contain; border-radius: 8px; user-select: none; -webkit-user-select: none; }
 .airtel-banner { background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%); padding: 12px; border-radius: 10px 10px 0 0; margin-top: 8px; display: flex; align-items: center; gap: 8px; color: #fff; font-weight: bold; }
@@ -174,7 +175,7 @@
   <img src="https://i.imgur.com/VGTXXkQ.jpeg" style="width:100px; height:auto; border-radius:20px; margin-bottom:20px; box-shadow:0 0 30px #00ffcc55;">
   <h2 style="color:#00ffcc; font-size:24px; margin-bottom:15px;">Mada Game Earn</h2>
   <p style="color:#ccc; font-size:15px; margin-bottom:30px; line-height:1.5;">For the best experience and to play PvP Checkers, please download our app.</p>
-  <a id="appDownloadLink" href="https://github.com/madabanda657-netizen/Mada-checker-V2/releases/download/V2.0/mada-checker.v2.apk" target="_blank" style="background:linear-gradient(45deg,#00ffcc,#00ccff); color:#000; font-weight:bold; padding:15px 40px; border-radius:12px; text-decoration:none; font-size:18px; display:inline-block; margin-bottom:15px; box-shadow:0 4px 15px #00ffcc44;">📲 Download App</a>
+  <a id="appDownloadLink" href="https://github.com/madabanda657-netizen/Mada-checker-earn/releases/download/v1.0/app-release.2.apk" target="_blank" style="background:linear-gradient(45deg,#00ffcc,#00ccff); color:#000; font-weight:bold; padding:15px 40px; border-radius:12px; text-decoration:none; font-size:18px; display:inline-block; margin-bottom:15px; box-shadow:0 4px 15px #00ffcc44;">📲 Download App</a>
   <p style="color:#555; font-size:12px; margin-top:20px;">Open this in the Mada Earn App to continue.</p>
 </div>
 
@@ -200,6 +201,20 @@
 <div id="imageViewerModal"><div class="iv-top-bar"><span id="ivTitle" style="color:#fff;font-weight:bold;font-size:14px">📷 Photo</span><div style="display:flex;gap:8px"><button onclick="saveImageFromViewer()" style="width:auto;padding:8px 16px;background:#51cf66;color:#000;font-weight:bold;border-radius:8px;font-size:13px">💾 Save</button><button onclick="closeImageViewer()" style="width:auto;padding:8px 16px;background:#ff6b6b;color:#fff;border-radius:8px;font-size:13px">✕ Close</button></div></div><div class="iv-img-wrap"><img id="imageViewerImg" src="" alt="Photo"></div></div>
 
 <div class="container">
+  
+<!-- ADSTERRA BANNER (TOP OF EVERY PAGE) -->
+<div style="margin: 0 auto 15px auto; width: 100%; max-width: 320px; min-height: 250px; display: flex; justify-content: center; align-items: center;">
+    <script type="text/javascript">
+        atOptions = {
+            'key' : 'ad1f2717ce15725e76c4ffc1d25e948e',
+            'format' : 'iframe',
+            'height' : 250,
+            'width' : 300,
+            'params' : {}
+        };
+    </script>
+    <script type="text/javascript" src="https://www.highperformanceformat.com/ad1f2717ce15725e76c4ffc1d25e948e/invoke.js"></script>
+</div>
 
 <div id="loginPage" class="page active">
     <img src="https://i.imgur.com/VGTXXkQ.jpeg" style="width:120px;height:auto;border-radius:15px;margin-bottom:10px;box-shadow:0 0 20px #00ffcc55">
@@ -340,8 +355,8 @@
 
   <div class="card referral-card" style="border-color:#00ccff">
     <h3>🎁 Free Points (Watch Ad)</h3>
-    <p style="font-size:13px;color:#ccc;margin-bottom:10px">Out of points? Watch an ad to get 50 free points!</p>
-    <button onclick="claimFreePoints()" id="freePointsBtn" style="background:linear-gradient(45deg,#00ccff,#0099cc)">📺 Watch Ad for 50 Points</button>
+    <p style="font-size:13px;color:#ccc;margin-bottom:10px">Out of points? Watch an ad to get 500 free points!</p>
+    <button onclick="claimFreePoints()" id="freePointsBtn" style="background:linear-gradient(45deg,#00ccff,#0099cc)">📺 Watch Ad for 500 Points</button>
     <p id="freePointsMsg" style="margin-top:10px;font-size:12px;color:#888;"></p>
   </div>
 
@@ -376,6 +391,7 @@
 
 <div id="inboxPage" class="page">
   <h1>📥 Admin Inbox</h1>
+  <div style="background:#1a1a2e; padding:10px; border-radius:8px; border-left:4px solid #00ffcc; margin-bottom:15px; font-size:12px; color:#ddd; text-align:left;">ℹ️ <b>Tip:</b> Upload the screenshot of your deposit SMS here using the 📎 button.</div>
   <div id="inboxMessages" class="card" style="height: 350px; overflow-y: auto; margin-bottom: 15px; text-align: left; background: #0a0a0a;"><div style="text-align:center;color:#555;padding:20px;">Loading...</div></div>
   <div class="card">
      <h3>Send Message to Admin</h3>
@@ -420,6 +436,12 @@
   <div class="chat-input-bar"><label class="chat-attach-btn">📎<input type="file" id="chatFileInput" accept="image/*" onchange="handleChatFileUpload(event)"></label><button class="chat-voice-btn" id="voiceNoteBtn" onclick="toggleVoiceNote()">🎤</button><input type="text" id="chatMsgInput" placeholder="Type a message..." style="flex:1" onkeypress="if(event.key==='Enter'){event.preventDefault();sendChatMsg();}"><button onclick="sendChatMsg()" style="width:auto;padding:12px 18px;flex-shrink:0;margin:0">Send</button></div>
 </div>
 
+<!-- ADSTERRA NATIVE BANNER (BOTTOM OF EVERY PAGE) -->
+<div style="margin: 15px auto 80px auto; width: 100%; max-width: 320px; display: flex; justify-content: center; align-items: center;">
+    <script async="async" data-cfasync="false" src="https://pl29315230.effectivecpmnetwork.com/8dd30229fd7b7e3f3aeef1a7af787161/invoke.js"></script>
+    <div id="container-8dd30229fd7b7e3f3aeef1a7af787161"></div>
+</div>
+
 </div>
 
 <div class="nav" id="mainNav">
@@ -431,35 +453,6 @@
 </div>
 
 <script>
-/* ===== ADSTERRA GAME END AD TRIGGER ===== */
-var adsterraAdLoaded = false;
-function triggerGameEndAd() {
-    if (adsterraAdLoaded) return; // Prevent multiple script tags
-    adsterraAdLoaded = true;
-    try {
-        var script = document.createElement('script');
-        script.src = "https://windingfold.com/25/5f/d4/255fd4d49ed995c22b93ccd0ace3c1c9.js";
-        script.async = true;
-        script.setAttribute('data-cfasync', 'false');
-        document.body.appendChild(script);
-    } catch(e) {}
-}
-
-/* ===== ADSTERRA VIGNETTE AD TRIGGER (MENUS) ===== */
-var lastVignetteAd = 0;
-function triggerVignetteAd() {
-    var now = Date.now();
-    if (now - lastVignetteAd < 60000) return; // 60 sec cooldown to prevent spam
-    lastVignetteAd = now;
-    try {
-        var s = document.createElement('script');
-        s.dataset.zone = '10954399';
-        s.src = 'https://n6wxm.com/vignette.min.js';
-        document.body.appendChild(s);
-    } catch(e) {}
-}
-/* ======================================== */
-
 /* ===== SAFE IMAGE VIEWER ===== */
 function openImageViewer(src){document.getElementById('imageViewerImg').src=src;document.getElementById('imageViewerModal').style.display='flex'}
 function closeImageViewer(){document.getElementById('imageViewerModal').style.display='none';document.getElementById('imageViewerImg').src=''}
@@ -472,10 +465,10 @@ function playSound(type){if(localStorage.getItem('soundDisabled')==='true')retur
 
 /* ===== CORE APP ===== */
 var db=null;
-try{if(typeof firebase!=='undefined'&&firebase.apps&&firebase.apps.length===0){firebase.initializeApp({apiKey:"AIzaSyDy17a8q0idnDEILFWaIn2b1U_vIiQoRLw",authDomain:"mada-checker.firebaseapp.com",databaseURL:"https://mada-checker-default-rtdb.firebaseio.com",projectId:"mada-checker",storageBucket:"mada-checker.firebasestorage.app",messagingSenderId:"51892649844",appId:"1:51892649844:web:a15526d0cad7629820f621",measurementId:"G-6EF4R4GL48"});db=firebase.database()}}catch(e){db=null}
+try{if(typeof firebase!=='undefined'&&firebase.apps&&firebase.apps.length===0){firebase.initializeApp({apiKey:"AIzaSyDy17a8q0idnDEILFWaIn2b1U_vIiQoRLw",authDomain:"mada-checker.firebaseapp.com",databaseURL:"https://mada-checker-default-rtdb.firebaseio.com",projectId:"mada-checker",storageBucket:"mada-checker.firebasestorage.app",messagingSenderId:"51892649844",appId:"1:51892649844:web:a15526d0cad7629820f621",measurementId:"G-6EF4R4GL48"});db=firebase.database();var appCheck=firebase.appCheck();appCheck.activate(new firebase.appCheck.ReCaptchaV3Provider('6LeoB_8sAAAAAJS4kepjICEYny7besSCK4mv3l9Q'),true);appCheck.getToken().then(function(t){var b=document.getElementById('appcheckBadge');if(b){if(t&&t.token){b.className='appcheck-badge ok';b.textContent='🔒 App Check: Active';setTimeout(function(){b.style.display='none'},3000)}else{b.className='appcheck-badge fail';setTimeout(function(){b.style.display='none'},5000)}}}).catch(function(){var b=document.getElementById('appcheckBadge');if(b){b.className='appcheck-badge fail';setTimeout(function(){b.style.display='none'},5000)}})}}catch(e){db=null}
 
 var DAILY_LIMIT=12000;var gameState={};var captchaAnswer=0;
-var PVP_GRADES=[{id:1,name:'Grade 1',entryMWK:50,winMWK:80,icon:'🥉'},{id:2,name:'Grade 2',entryMWK:200,winMWK:320,icon:'🥈'},{id:3,name:'Grade 3',entryMWK:500,winMWK:800,icon:'🥇'},{id:4,name:'Grade 4',entryMWK:1000,winMWK:1600,icon:'💎'}];
+var PVP_GRADES=[{id:1,name:'Grade 1',entryMWK:500,winMWK:800,icon:'🥉'},{id:2,name:'Grade 2',entryMWK:2000,winMWK:3200,icon:'🥈'},{id:3,name:'Grade 3',entryMWK:5000,winMWK:8000,icon:'🥇'},{id:4,name:'Grade 4',entryMWK:10000,winMWK:16000,icon:'💎'}];
 var myUid=null;var myPlayerNumber=0;var currentGameId=null;var gameListener=null;var processedGameEnds={};
 var isHumanReg = false; var isHumanLogin = false;
 
@@ -499,10 +492,12 @@ function checkVpn() {
 /* ===== COMMUNITY STATS (TRUST FEATURES) ===== */
 function loadCommunityStats() {
     if(!db) return;
+    // Total Players
     db.ref('leaderboard_all').on('value', function(snap) {
         var el = document.getElementById('totalPlayersStat');
         if(el) el.innerText = snap.numChildren();
     });
+    // Online Now
     db.ref('online_status').on('value', function(snap) {
         var count = 0;
         snap.forEach(function(child) {
@@ -513,6 +508,7 @@ function loadCommunityStats() {
         var el2 = document.getElementById('totalOnlineStat');
         if(el2) el2.innerText = count;
     });
+    // Bundles Paid
     db.ref('withdraw_requests').orderByChild('status').equalTo('approved').on('value', function(snap) {
         var el = document.getElementById('totalBundlesPaid');
         if(el) el.innerText = snap.numChildren();
@@ -597,7 +593,7 @@ function loadProfile(){if(!db||!myUid)return;db.ref('users/'+myUid).once('value'
 
 function loadProfileStats(){if(!db||!myUid)return;db.ref('leaderboard_all/'+myUid).once('value',function(s){var d=s.val()||{};var played=parseInt(d.gamesPlayed)||0;var won=parseInt(d.gamesWon)||0;var winRate=played>0?Math.round((won/played)*100):0;var winStreak=d.winStreak||0;document.getElementById('profileWinRate').innerText=winRate+'%';document.getElementById('profileWinStreak').innerText=winStreak;db.ref('leaderboard_all').once('value',function(allSnap){var users=[];allSnap.forEach(function(child){var ud=child.val()||{};users.push({uid:child.key,wins:parseInt(ud.gamesWon)||0,streak:ud.winStreak||0})});users.sort(function(a,b){return b.wins-a.wins||b.streak-a.streak});var rank=-1;for(var i=0;i<users.length;i++){if(users[i].uid===myUid){rank=i+1;break}}var rankBox=document.getElementById('profileRankBox');if(rank>0){var rankClass=rank===1?'rank-gold':(rank===2?'rank-silver':(rank===3?'rank-bronze':'rank-default'));var rankEmoji=rank===1?'🥇':(rank===2?'🥈':(rank===3?'🥉':'🏅'));rankBox.innerHTML='<span class="rank-badge '+rankClass+'" style="font-size:16px;">'+rankEmoji+' #'+rank+'</span>'}else{rankBox.innerHTML='<span style="color:#555;font-size:16px;">#-</span>'}});db.ref('users/'+myUid).once('value',function(us){var ud=us.val()||{};var verEl=document.getElementById('profileVerification');if(ud.email&&ud.phone){verEl.innerHTML='<span class="verification-badge verified">✅ Verified</span>'}else{verEl.innerHTML='<span class="verification-badge unverified">❌ Unverified</span>'}})})}
 
-function loadRecentMatches(){if(!db||!myUid)return;db.ref('match_history/'+myUid).orderByChild('timestamp').limitToLast(10).once('value',function(s){var el=document.getElementById('recentMatchesList');if(!s.exists()){el.innerHTML='<div style="text-align:center;color:#555;font-size:12px;padding:10px;">No matches yet</div>';return}var matches=[];s.forEach(function(c){matches.push(c.val())});matches.reverse();var html='';matches.forEach(function(m){var resultClass=m.result==='win'?'match-result-win':(m.result==='loss'?'match-result-loss':'match-result-draw');var resultText=m.result==='win'?'🏆 WIN':(m.result==='loss'?'😞 LOSS':'🤝 DRAW');var amtColor=m.result==='win'?'#51cf66':(m.result==='loss'?'#ff6b6b':'#ffd700');var amountText=m.result==='win'?'+ '+m.amount+' Pts':(m.result==='loss'?'- '+m.amount+' Pts':'Refunded');html+='<div class="recent-match-item">';html+='<div style="text-align:left"><span style="color:#ccc;font-size:13px">vs '+escapeHtml(m.opponent||'?')+'</span><br><span style="color:#555;font-size:10px">'+new Date(m.timestamp).toLocaleDateString()+' '+new Date(m.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</span></div>';html+='<div style="text-align:right"><span class="'+resultClass+'">'+resultText+'</span><br><span style="font-size:11px;color:'+amtColor+'>'+amountText+'</span></div>';html+='</div>'});el.innerHTML=html})}
+function loadRecentMatches(){if(!db||!myUid)return;db.ref('match_history/'+myUid).orderByChild('timestamp').limitToLast(10).once('value',function(s){var el=document.getElementById('recentMatchesList');if(!s.exists()){el.innerHTML='<div style="text-align:center;color:#555;font-size:12px;padding:10px;">No matches yet</div>';return}var matches=[];s.forEach(function(c){matches.push(c.val())});matches.reverse();var html='';matches.forEach(function(m){var resultClass=m.result==='win'?'match-result-win':(m.result==='loss'?'match-result-loss':'match-result-draw');var resultText=m.result==='win'?'🏆 WIN':(m.result==='loss'?'😞 LOSS':'🤝 DRAW');var amtColor=m.result==='win'?'#51cf66':(m.result==='loss'?'#ff6b6b':'#ffd700');var amountText=m.result==='win'?'+ '+m.amount+' Pts':(m.result==='loss'?'- '+m.amount+' Pts':'Refunded');html+='<div class="recent-match-item">';html+='<div style="text-align:left"><span style="color:#ccc;font-size:13px">vs '+escapeHtml(m.opponent||'?')+'</span><br><span style="color:#555;font-size:10px">'+new Date(m.timestamp).toLocaleDateString()+' '+new Date(m.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</span></div>';html+='<div style="text-align:right"><span class="'+resultClass+'">'+resultText+'</span><br><span style="font-size:11px;color:'+amtColor+'">'+amountText+'</span></div>';html+='</div>'});el.innerHTML=html})}
 
 function showEditDisplayName(){document.getElementById('editNameModal').style.display='flex';var currentName=document.getElementById('profileDisplayName').innerText;document.getElementById('editNameInput').value=currentName;document.getElementById('editNameMsg').innerHTML=''}
 function closeEditNameModal(){document.getElementById('editNameModal').style.display='none'}
@@ -628,17 +624,13 @@ function showLogin(){document.getElementById('registerCard').style.display='none
 function validateAirtelNumber(input){var val=input.value.replace(/[^0-9]/g,'');var msgEl=document.getElementById('airtelValidationMsg');var networkSelect=document.getElementById('networkRegInput');if(val.length>=2){if(val.substring(0,2)==='99'||val.substring(0,2)==='98'){msgEl.innerHTML='<span style="color:#51cf66;">✅ Airtel number detected - Perfect!</span>';if(networkSelect.value!=='Airtel Money')networkSelect.value='Airtel Money'}else if(val.substring(0,2)==='88'||val.substring(0,2)==='89'){msgEl.innerHTML='<span style="color:#ffd700;">⚠️ TNM number detected - Airtel is recommended</span>';if(networkSelect.value!=='TNM Mpamba')networkSelect.value='TNM Mpamba'}else{msgEl.innerHTML='<span style="color:#ff6b6b;">❌ Invalid Malawi number</span>'}}else{msgEl.innerHTML='<span style="color:#888;">💡 Tip: Airtel numbers start with 99 or 98</span>'}}
 function checkAirtelRecommend(){var network=document.getElementById('networkRegInput').value;var msgEl=document.getElementById('airtelValidationMsg');if(network==='TNM Mpamba'){msgEl.innerHTML='<span style="color:#ffd700;">⚠️ You selected TNM. Airtel (99/98) is recommended!</span>'}}
 
-function register(){try{var user=(document.getElementById("usernameInput").value||"").trim(),networkReg=document.getElementById("networkRegInput").value,phoneDigits=(document.getElementById("phoneInput").value||"").trim(),email=(document.getElementById("emailInput").value||"").trim(),pass=document.getElementById("passwordInput").value||"",agree=document.getElementById("agreeCheck").checked,msgEl=document.getElementById("loginMsg");if(user.length<3){msgEl.innerHTML='<span class="error">Username min 3</span>';return}if(!networkReg){msgEl.innerHTML='<span class="error">Select network</span>';return}var fullPhone=formatMalawiPhone(phoneDigits);if(!isValidMalawiPhone(fullPhone)){msgEl.innerHTML='<span class="error">Invalid Phone</span>';return}var isAirtel=fullPhone.match(/^(?:\+265|0)(99|98)/);if(!isAirtel){if(!confirm('You entered a TNM number (88). Airtel (99/98) is recommended for faster bundles. Continue anyway?'))return}if(!email){msgEl.innerHTML='<span class="error">Enter email</span>';return}if(pass.length<6){msgEl.innerHTML='<span class="error">Password min 6</span>';return}if(!agree){msgEl.innerHTML='<span class="error">Must agree</span>';return}if(!isHumanReg){msgEl.innerHTML='<span class="error">⚠️ Please slide to verify you are human!</span>';return}msgEl.innerHTML='<span class="success">Creating...</span>';var name=user.replace(/\s+/g,'_').replace(/[.#$\[\]]/g,''),refCode=new URLSearchParams(window.location.search).get('ref');if(refCode){try{localStorage.setItem('refCode',refCode)}catch(e){}}var savedRefCode=localStorage.getItem('refCode')||null;try{localStorage.setItem("user",name);localStorage.setItem("userPhone",fullPhone);localStorage.setItem("network",networkReg)}catch(e){}myUid=name;document.getElementById("loginPage").classList.remove("active");document.getElementById("mainNav").style.display="flex";showPage('profile');setTimeout(function(){if(!db)return;var ek=emailToKey(email);db.ref('users/'+name).set({phone:fullPhone,network:networkReg,email:email,created:Date.now(),password:md5(pass),winStreak:0,mwk:0});db.ref('email_index/'+ek).set({uid:name});db.ref('leaderboard_all/'+name).once('value',function(sn){if(!sn.exists()){db.ref('leaderboard_all/'+name).set({mwk:0,score:0,gamesPlayed:0,gamesWon:0,gamesLost:0,winStreak:0,referralClaimed:0,banned:false,lastPlayed:Date.now(),displayName:user,phone:fullPhone,network:networkReg});if(savedRefCode&&savedRefCode!==name)db.ref('referrals/'+savedRefCode+'/'+name).set(true)}});lockPaymentMethod(fullPhone,networkReg);initGameListeners();setupInboxNotif();checkVpn();},200)}catch(e){alert("Error: "+e.message)}}
+function register(){try{var user=(document.getElementById("usernameInput").value||"").trim(),networkReg=document.getElementById("networkRegInput").value,phoneDigits=(document.getElementById("phoneInput").value||"").trim(),email=(document.getElementById("emailInput").value||"").trim(),pass=document.getElementById("passwordInput").value||"",agree=document.getElementById("agreeCheck").checked,msgEl=document.getElementById("loginMsg");if(user.length<3){msgEl.innerHTML='<span class="error">Username min 3</span>';return}if(!networkReg){msgEl.innerHTML='<span class="error">Select network</span>';return}var fullPhone=formatMalawiPhone(phoneDigits);if(!isValidMalawiPhone(fullPhone)){msgEl.innerHTML='<span class="error">Invalid Phone</span>';return}var isAirtel=fullPhone.match(/^(?:\+265|0)(99|98)/);if(!isAirtel){if(!confirm('You entered a TNM number (88). Airtel (99/98) is recommended for faster bundles. Continue anyway?'))return}if(!email){msgEl.innerHTML='<span class="error">Enter email</span>';return}if(pass.length<6){msgEl.innerHTML='<span class="error">Password min 6</span>';return}if(!agree){msgEl.innerHTML='<span class="error">Must agree</span>';return}if(!isHumanReg){msgEl.innerHTML='<span class="error">⚠️ Please slide to verify you are human!</span>';return}msgEl.innerHTML='<span class="success">Creating...</span>';var name=user.replace(/\s+/g,'_').replace(/[.#$\[\]]/g,''),refCode=new URLSearchParams(window.location.search).get('ref');if(refCode){try{localStorage.setItem('refCode',refCode)}catch(e){}}var savedRefCode=localStorage.getItem('refCode')||null;try{localStorage.setItem("user",name);localStorage.setItem("userPhone",fullPhone);localStorage.setItem("network",networkReg)}catch(e){}myUid=name;document.getElementById("loginPage").classList.remove("active");document.getElementById("mainNav").style.display="flex";showPage('profile');setTimeout(function(){if(!db)return;var ek=emailToKey(email);db.ref('users/'+name).set({phone:fullPhone,network:networkReg,email:email,created:Date.now(),password:md5(pass),winStreak:0,mwk:0});db.ref('email_index/'+ek).set({uid:name});db.ref('leaderboard_all/'+name).once('value',function(sn){if(!sn.exists()){db.ref('leaderboard_all/'+name).set({mwk:1000,score:0,gamesPlayed:0,gamesWon:0,gamesLost:0,winStreak:0,referralClaimed:0,banned:false,lastPlayed:Date.now(),displayName:user,phone:fullPhone,network:networkReg});if(savedRefCode&&savedRefCode!==name)db.ref('referrals/'+savedRefCode+'/'+name).set(true)}});lockPaymentMethod(fullPhone,networkReg);initGameListeners();setupInboxNotif();checkVpn();},200)}catch(e){alert("Error: "+e.message)}}
 
 function login(){try{var rawName=(document.getElementById("loginUsernameInput").value||"").trim(),pass=document.getElementById("loginPasswordInput").value,msgEl=document.getElementById("loginErrorMsg");if(!rawName||!pass){msgEl.innerHTML='<span class="error">Enter username & password</span>';return}if(!isHumanLogin){msgEl.innerHTML='<span class="error">⚠️ Please slide to verify you are human!</span>';return}var name=rawName.replace(/\s+/g,'_').replace(/[.#$\[\]]/g,'');msgEl.innerHTML='<span class="success">Checking...</span>';if(!db){msgEl.innerHTML='<span class="error">DB error</span>';return}db.ref('users/'+name).once('value',function(sn){var data=sn.val();if(!data){msgEl.innerHTML='<span class="error">User not found</span>';return}if(data.password!==md5(pass)){msgEl.innerHTML='<span class="error">Wrong password</span>';return}if(data.email){var ek=emailToKey(data.email);db.ref('email_index/'+ek).once('value',function(is){if(!is.exists())db.ref('email_index/'+ek).set({uid:name})})}localStorage.setItem("user",name);myUid=name;document.getElementById("loginPage").classList.remove("active");document.getElementById("mainNav").style.display="flex";showPage('profile');lockPaymentMethod(data.phone||'',data.network||'');initGameListeners();setupInboxNotif();checkVpn();})}catch(e){alert(e.message)}}
 
 function logout(){if(confirm('Logout?')){localStorage.removeItem('user');myUid=null;location.reload()}}
 
-function showPage(page){try{var pages=document.querySelectorAll('.page');for(var i=0;i<pages.length;i++){pages[i].classList.remove('active');pages[i].style.display=''}var btns=document.querySelectorAll('.nav-btn');for(var j=0;j<btns.length;j++)btns[j].classList.remove('active');document.getElementById('mainNav').style.display='flex';document.getElementById('waFloatBtn').style.display='flex';if(page==='profile'){document.getElementById('profilePage').classList.add('active');if(btns[0])btns[0].classList.add('active');loadProfile()}else if(page==='wallet'){document.getElementById('walletPage').classList.add('active');if(btns[1])btns[1].classList.add('active');showBalance();listenMyWithdrawals();loadReferralData();triggerVignetteAd(); // Trigger Vignette Ad
-}else if(page==='chat'){document.getElementById('chatPage').classList.add('active');if(btns[2])btns[2].classList.add('active');if(window.loadChatUsers)window.loadChatUsers();triggerVignetteAd(); // Trigger Vignette Ad
-}else if(page==='play'){document.getElementById('playPage').classList.add('active');if(btns[3])btns[3].classList.add('active');renderGrades();triggerVignetteAd(); // Trigger Vignette Ad
-}else if(page==='inbox'){document.getElementById('inboxPage').classList.add('active');if(btns[4])btns[4].classList.add('active');loadInbox();document.getElementById('inboxNotifDot').style.display='none';triggerVignetteAd(); // Trigger Vignette Ad
-}else if(page==='game'){document.getElementById('gamePage').classList.add('active');document.getElementById('mainNav').style.display='none';document.getElementById('waFloatBtn').style.display='none'}}catch(e){console.error('showPage error:',e)}}
+function showPage(page){try{var pages=document.querySelectorAll('.page');for(var i=0;i<pages.length;i++){pages[i].classList.remove('active');pages[i].style.display=''}var btns=document.querySelectorAll('.nav-btn');for(var j=0;j<btns.length;j++)btns[j].classList.remove('active');document.getElementById('mainNav').style.display='flex';document.getElementById('waFloatBtn').style.display='flex';if(page==='profile'){document.getElementById('profilePage').classList.add('active');if(btns[0])btns[0].classList.add('active');loadProfile()}else if(page==='wallet'){document.getElementById('walletPage').classList.add('active');if(btns[1])btns[1].classList.add('active');showBalance();listenMyWithdrawals();loadReferralData()}else if(page==='chat'){document.getElementById('chatPage').classList.add('active');if(btns[2])btns[2].classList.add('active')}else if(page==='play'){document.getElementById('playPage').classList.add('active');if(btns[3])btns[3].classList.add('active');renderGrades()}else if(page==='inbox'){document.getElementById('inboxPage').classList.add('active');if(btns[4])btns[4].classList.add('active');loadInbox();document.getElementById('inboxNotifDot').style.display='none'}else if(page==='game'){document.getElementById('gamePage').classList.add('active');document.getElementById('mainNav').style.display='none';document.getElementById('waFloatBtn').style.display='none'}}catch(e){console.error('showPage error:',e)}}
 
 function showBalance(){try{if(!db)return;db.ref('leaderboard_all/'+myUid).once('value',function(s){var d=s.val()||{};document.getElementById("balanceText").innerHTML="💎 "+(d.mwk||0).toLocaleString()+" Points";document.getElementById("statPlayed").innerText=parseInt(d.gamesPlayed)||0;document.getElementById("statWon").innerText=parseInt(d.gamesWon)||0;document.getElementById("statLost").innerText=parseInt(d.gamesLost)||0})}catch(e){}}
 function loadReferralData(){if(!db||!myUid)return;var bu=window.location.href.split('?')[0];document.getElementById('refLinkInput').value=bu+'?ref='+myUid;db.ref('referrals/'+myUid).once('value',function(s){var c=s.numChildren();document.getElementById('refCount').innerText=c;db.ref('leaderboard_all/'+myUid+'/referralClaimed').once('value',function(cs){var cl=cs.val()||0,uc=Math.floor(c/5)-cl,cb=document.getElementById('claimRefBtn');if(uc>0){cb.style.display='block';cb.innerText='🎉 Claim 500 Points'}else cb.style.display='none'})})}
@@ -647,46 +639,49 @@ function claimReferralBonus(){if(!db||!myUid)return;db.ref('referrals/'+myUid).o
 
 function claimFreePoints() {
     if(!db || !myUid) return;
-    var msgEl = document.getElementById('freePointsMsg');
-    var btn = document.getElementById('freePointsBtn');
+    var lastClaim = localStorage.getItem('lastClaim') || 0;
+    var now = Date.now();
+    var fourHours = 4 * 60 * 60 * 1000; // 4 hour cooldown
     
-    if(btn.disabled) return; // Prevent double clicking
-    
-    if (typeof show_9816593 !== 'function') {
-        msgEl.innerHTML = '<span style="color:#ff6b6b">Ad script not loaded yet. Please wait a moment and try again.</span>';
+    if (now - lastClaim < fourHours) {
+        var minsLeft = Math.ceil((fourHours - (now - lastClaim)) / (60 * 1000));
+        document.getElementById('freePointsMsg').innerHTML = '<span style="color:#ff6b6b">Please wait '+minsLeft+' minute(s) before claiming again.</span>';
         return;
     }
+    
+    // 1. Open the Smartlink Ad
+    var smartLinkUrl = "https://www.effectivecpmnetwork.com/t8tjsy9mh?key=cfa189de2ae8b8c274002e8673ae6f04";
+    window.open(smartLinkUrl, '_blank');
 
-    btn.disabled = true;
-    btn.innerText = 'Loading Ad...';
-    msgEl.innerHTML = '<span style="color:#00ccff">Please wait, loading ad...</span>';
-
-    // Call Monetag Rewarded Interstitial
-    show_9816593().then(() => {
-        // User watched the ad successfully, grant 50 points
-        db.ref('leaderboard_all/'+myUid+'/mwk').transaction(function(cur) { return (cur || 0) + 50; }).then(function(){
-            msgEl.innerHTML = '<span style="color:#51cf66">✅ You got 50 free points! Keep playing.</span>';
-            showBalance();
-            btn.disabled = false;
-            btn.innerText = '📺 Watch Ad for 50 Points';
-        }).catch(function(err) {
-            msgEl.innerHTML = '<span style="color:#ff6b6b">Error saving points: Database locked.</span>';
-            btn.disabled = false;
-            btn.innerText = '📺 Watch Ad for 50 Points';
-        });
-    }).catch(function(err) {
-        // Ad failed to load or user closed it early
-        msgEl.innerHTML = '<span style="color:#ff6b6b">Ad closed early. No points awarded.</span>';
-        btn.disabled = false;
-        btn.innerText = '📺 Watch Ad for 50 Points';
-    });
+    // 2. Start Countdown
+    var modal = document.getElementById('adCountdownModal');
+    var timerEl = document.getElementById('adCountdownTimer');
+    var timeLeft = 10;
+    
+    modal.style.display = 'flex';
+    timerEl.innerText = timeLeft;
+    
+    var interval = setInterval(function() {
+        timeLeft--;
+        timerEl.innerText = timeLeft;
+        if (timeLeft <= 0) {
+            clearInterval(interval);
+            modal.style.display = 'none';
+            // 3. Reward the user
+            db.ref('leaderboard_all/'+myUid+'/mwk').transaction(function(cur) { return (cur || 0) + 500; }).then(function(){
+                localStorage.setItem('lastClaim', now);
+                document.getElementById('freePointsMsg').innerHTML = '<span style="color:#51cf66">✅ You got 500 free points! Keep playing.</span>';
+                showBalance();
+            });
+        }
+    }, 1000);
 }
 
 function renderGrades(){var g=document.getElementById('gradeGrid'),h='';PVP_GRADES.forEach(function(gr){h+='<div class="grade-card" onclick="joinPvP('+gr.id+')"><div class="grade-icon">'+gr.icon+'</div><h3 style="color:#fff;font-size:16px">'+gr.name+'</h3><div class="grade-entry">Pay: '+gr.entryMWK+' Pts</div><div class="grade-prize">Win: '+gr.winMWK+' Pts</div></div>'});g.innerHTML=h;showBalance()}
 
 function joinPvP(gid){if(!db||!myUid){alert('Login first');return}var gr=PVP_GRADES.find(function(g){return g.id===gid});if(!gr)return;db.ref('leaderboard_all/'+myUid+'/mwk').once('value',function(s){var b=s.val()||0;if(b<gr.entryMWK){alert('Not enough points! Need '+gr.entryMWK+' points.');return}document.getElementById('searchGradeText').innerText=gr.name+' - '+gr.entryMWK+' Pts';document.getElementById('searchingOverlay').style.display='flex';var queueRef=db.ref('pvp_queue/'+gid+'/'+myUid);queueRef.set({timestamp:Date.now(),entryMWK:gr.entryMWK});queueRef.onDisconnect().remove();})}
 
-if(db){db.ref('pvp_queue').on('value',function(s){if(!myUid)return;s.forEach(function(gs){var gid=gs.key,pl=[];gs.forEach(function(ps){pl.push(ps.key)});if(pl.length>=2&&(pl.indexOf(myUid)>=0)){var sorted=pl.slice().sort();var p1=sorted[0],p2=sorted[1];var gameId='game_'+gid+'_'+p1+'_'+p2+'_'+Date.now();var gd=PVP_GRADES.find(function(g){return g.id===parseInt(gid)});var entryMWK=gd.entryMWK;if(myUid!==p1)return;db.ref('pvp_queue/'+gid+'/'+p1).remove();db.ref('pvp_queue/'+gid+'/'+p2).remove();db.ref('leaderboard_all/'+p1+'/mwk').once('value',function(s1){var b1=s1.val()||0;if(b1<entryMWK){db.ref('pvp_queue/'+gid+'/'+p2).set({timestamp:Date.now(),entryMWK:entryMWK});if(myUid===p1){alert('❌ Not enough points! Match cancelled.');document.getElementById('searchingOverlay').style.display='none'}return}db.ref('leaderboard_all/'+p1).update({mwk:b1-entryMWK},function(e1){if(e1){db.ref('pvp_queue/'+gid+'/'+p2).set({timestamp:Date.Now(),entryMWK:entryMWK});return}db.ref('leaderboard_all/'+p2+'/mwk').once('value',function(s2){var b2=s2.val()||0;if(b2<entryMWK){db.ref('leaderboard_all/'+p1+'/mwk').once('value',function(s1b){db.ref('leaderboard_all/'+p1).update({mwk:(s1b.val()||0)+entryMWK})});db.ref('pvp_queue/'+gid+'/'+p1).set({timestamp:Date.Now(),entryMWK:entryMWK});return}db.ref('leaderboard_all/'+p2).update({mwk:b2-entryMWK},function(e2){if(e2){db.ref('leaderboard_all/'+p1+'/mwk').once('value',function(s1b){db.ref('leaderboard_all/'+p1).update({mwk:(s1b.val()||0)+entryMWK})});db.ref('pvp_queue/'+gid+'/'+p1).set({timestamp:Date.Now(),entryMWK:entryMWK});return}var ib=[];for(var r=0;r<8;r++){for(var c=0;c<8;c++){ib.push((r+c)%2&&r<3?-1:(r+c)%2&&r>4?1:0)}}db.ref('pvp_games/'+gameId).transaction(function(data){if(data===null||(data&&data.status==='finished')){return{p1:p1,p2:p2,gradeId:gid,winMWK:gd.winMWK,entryMWK:entryMWK,board:ib,turn:1,status:'playing',winner:null,created:Date.Now(),drawCounter:0,drawTargetPlayer:0}}return data})})})})})}})})}
+if(db){db.ref('pvp_queue').on('value',function(s){if(!myUid)return;s.forEach(function(gs){var gid=gs.key,pl=[];gs.forEach(function(ps){pl.push(ps.key)});if(pl.length>=2&&(pl.indexOf(myUid)>=0)){var sorted=pl.slice().sort();var p1=sorted[0],p2=sorted[1];var gameId='game_'+gid+'_'+p1+'_'+p2+'_'+Date.now();var gd=PVP_GRADES.find(function(g){return g.id===parseInt(gid)});var entryMWK=gd.entryMWK;if(myUid!==p1)return;db.ref('pvp_queue/'+gid+'/'+p1).remove();db.ref('pvp_queue/'+gid+'/'+p2).remove();db.ref('leaderboard_all/'+p1+'/mwk').once('value',function(s1){var b1=s1.val()||0;if(b1<entryMWK){db.ref('pvp_queue/'+gid+'/'+p2).set({timestamp:Date.now(),entryMWK:entryMWK});if(myUid===p1){alert('❌ Not enough points! Match cancelled.');document.getElementById('searchingOverlay').style.display='none'}return}db.ref('leaderboard_all/'+p1).update({mwk:b1-entryMWK},function(e1){if(e1){db.ref('pvp_queue/'+gid+'/'+p2).set({timestamp:Date.now(),entryMWK:entryMWK});return}db.ref('leaderboard_all/'+p2+'/mwk').once('value',function(s2){var b2=s2.val()||0;if(b2<entryMWK){db.ref('leaderboard_all/'+p1+'/mwk').once('value',function(s1b){db.ref('leaderboard_all/'+p1).update({mwk:(s1b.val()||0)+entryMWK})});db.ref('pvp_queue/'+gid+'/'+p1).set({timestamp:Date.now(),entryMWK:entryMWK});return}db.ref('leaderboard_all/'+p2).update({mwk:b2-entryMWK},function(e2){if(e2){db.ref('leaderboard_all/'+p1+'/mwk').once('value',function(s1b){db.ref('leaderboard_all/'+p1).update({mwk:(s1b.val()||0)+entryMWK})});db.ref('pvp_queue/'+gid+'/'+p1).set({timestamp:Date.now(),entryMWK:entryMWK});return}var ib=[];for(var r=0;r<8;r++){for(var c=0;c<8;c++){ib.push((r+c)%2&&r<3?-1:(r+c)%2&&r>4?1:0)}}db.ref('pvp_games/'+gameId).transaction(function(data){if(data===null||(data&&data.status==='finished')){return{p1:p1,p2:p2,gradeId:gid,winMWK:gd.winMWK,entryMWK:entryMWK,board:ib,turn:1,status:'playing',winner:null,created:Date.now(),drawCounter:0,drawTargetPlayer:0}}return data})})})})})}})})}
 
 var gameListenersSetup=false;
 function initGameListeners(){if(!db||!myUid||gameListenersSetup)return;gameListenersSetup=true;db.ref('pvp_games').orderByChild('p1').equalTo(myUid).on('value',handleGameUpdate);db.ref('pvp_games').orderByChild('p2').equalTo(myUid).on('value',handleGameUpdate)}
@@ -798,56 +793,7 @@ function makePvPMove(fR,fC,tR,tC){
     db.ref('pvp_games/'+currentGameId).update(u);
 }
 
-function endPvPGame(g){
-    if(!currentGameId)return;
-    if(processedGameEnds[currentGameId]){
-        currentGameId=null;gameState={};gameListener=null;myPlayerNumber=0;showPage('profile');return
-    }
-    processedGameEnds[currentGameId]=true;
-    
-    // === ADSTERRA POPUNDER TRIGGER (Game Finished) ===
-    triggerGameEndAd(); 
-    // ==================================================
-    
-    var endedGameId=currentGameId;
-    currentGameId=null;
-    gameState={};
-    if(gameListener){db.ref('pvp_games/'+gameListener).off()}
-    gameListener=null;
-    myPlayerNumber=0;
-    var isDraw=g.winner==='draw';
-    var isWin=!isDraw&&g.winner===myUid;
-    if(isDraw)playSound('move');else if(isWin)playSound('win');else playSound('lose');
-    db.ref('leaderboard_all/'+myUid).once('value',function(s){
-        var d=s.val()||{},u={};
-        var opponent=g.p1===myUid?g.p2:g.p1;
-        if(isDraw){
-            u.mwk=(d.mwk||0)+(g.entryMWK||0);
-            u.gamesPlayed=(parseInt(d.gamesPlayed)||0)+1;
-            u.winStreak=0;
-            db.ref('match_history/'+myUid).push({opponent:opponent,result:'draw',amount:g.entryMWK,gradeId:g.gradeId,timestamp:Date.Now()});
-            db.ref('leaderboard_all/'+myUid).update(u,function(){
-                alert('🤝 DRAW! '+(g.entryMWK||0)+' Points refunded.');
-                showPage('profile')
-            })
-        } else {
-            u.gamesPlayed=(parseInt(d.gamesPlayed)||0)+1;
-            u.gamesWon=(parseInt(d.gamesWon)||0)+(isWin?1:0);
-            u.gamesLost=(parseInt(d.gamesLost)||0)+(isWin?0:1);
-            u.winStreak=isWin?((d.winStreak||0)+1):0;
-            if(isWin)u.mwk=(d.mwk||0)+(g.winMWK||0);
-            db.ref('match_history/'+myUid).push({opponent:opponent,result:isWin?'win':'loss',amount:isWin?g.winMWK:g.entryMWK,gradeId:g.gradeId,timestamp:Date.Now()});
-            db.ref('leaderboard_all/'+myUid).update(u,function(){
-                alert(isWin?'🎉 YOU WIN! +'+(g.winMWK||0)+' Points':'😞 You Lost! '+(g.entryMWK||0)+' Points');
-                showPage('profile')
-            })
-        }
-    });
-    var now=Date.Now();
-    processedGameEnds[endedGameId]=now;
-    Object.keys(processedGameEnds).forEach(function(k){if(typeof processedGameEnds[k]==='number'&&now-processedGameEnds[k]>300000){delete processedGameEnds[k]}});
-    setTimeout(function(){if(db)db.ref('pvp_games/'+endedGameId).remove()},5000)
-}
+function endPvPGame(g){if(!currentGameId)return;if(processedGameEnds[currentGameId]){currentGameId=null;gameState={};gameListener=null;myPlayerNumber=0;showPage('profile');return}processedGameEnds[currentGameId]=true;var endedGameId=currentGameId;currentGameId=null;gameState={};if(gameListener){db.ref('pvp_games/'+gameListener).off()}gameListener=null;myPlayerNumber=0;var isDraw=g.winner==='draw';var isWin=!isDraw&&g.winner===myUid;if(isDraw)playSound('move');else if(isWin)playSound('win');else playSound('lose');db.ref('leaderboard_all/'+myUid).once('value',function(s){var d=s.val()||{},u={};var opponent=g.p1===myUid?g.p2:g.p1;if(isDraw){u.mwk=(d.mwk||0)+(g.entryMWK||0);u.gamesPlayed=(parseInt(d.gamesPlayed)||0)+1;u.winStreak=0;db.ref('match_history/'+myUid).push({opponent:opponent,result:'draw',amount:g.entryMWK,gradeId:g.gradeId,timestamp:Date.now()});db.ref('leaderboard_all/'+myUid).update(u,function(){alert('🤝 DRAW! '+(g.entryMWK||0)+' Points refunded.');showPage('profile')})}else{u.gamesPlayed=(parseInt(d.gamesPlayed)||0)+1;u.gamesWon=(parseInt(d.gamesWon)||0)+(isWin?1:0);u.gamesLost=(parseInt(d.gamesLost)||0)+(isWin?0:1);u.winStreak=isWin?((d.winStreak||0)+1):0;if(isWin)u.mwk=(d.mwk||0)+(g.winMWK||0);db.ref('match_history/'+myUid).push({opponent:opponent,result:isWin?'win':'loss',amount:isWin?g.winMWK:g.entryMWK,gradeId:g.gradeId,timestamp:Date.now()});db.ref('leaderboard_all/'+myUid).update(u,function(){alert(isWin?'🎉 YOU WIN! +'+(g.winMWK||0)+' Points':'😞 You Lost! '+(g.entryMWK||0)+' Points');showPage('profile')})}});var now=Date.now();processedGameEnds[endedGameId]=now;Object.keys(processedGameEnds).forEach(function(k){if(typeof processedGameEnds[k]==='number'&&now-processedGameEnds[k]>300000){delete processedGameEnds[k]}});setTimeout(function(){if(db)db.ref('pvp_games/'+endedGameId).remove()},5000)}
 
 function cancelMatchmaking(){if(db&&myUid){db.ref('pvp_queue').once('value',function(s){s.forEach(function(gs){if(gs.val()&&gs.val()[myUid]){var gid=gs.key;db.ref('pvp_queue/'+gid+'/'+myUid).remove()}})})}document.getElementById('searchingOverlay').style.display='none'}
 function exitGame(){if(confirm('Leave & FORFEIT?')){if(db&&currentGameId&&gameState){var winner=myPlayerNumber===1?gameState.p2:gameState.p1;db.ref('pvp_games/'+currentGameId).update({status:'finished',winner:winner})}}}
@@ -867,7 +813,7 @@ function submitWithdrawRequest(){
     }
     db.ref('leaderboard_all/'+myUid).update({mwk:cb-a},function(e){
       if(e){m.innerHTML='<span class="error">Error</span>';return}
-      db.ref('withdraw_requests').push({uid:myUid,amountMWK:a,status:'pending',timestamp:Date.Now()},function(e2){
+      db.ref('withdraw_requests').push({uid:myUid,amountMWK:a,status:'pending',timestamp:Date.now()},function(e2){
         if(e2){m.innerHTML='<span class="error">Failed</span>'}
         else{m.innerHTML='<span class="success">Requested! We will send your bundle within 24 hours.</span>';showBalance()}
       });
@@ -879,13 +825,14 @@ function listenMyWithdrawals(){if(!db||!myUid)return;db.ref('withdraw_requests')
 var inboxFileData=null,inboxFileName=null;var inboxMessagesCache={};
 function loadInbox(){if(!db||!myUid)return;db.ref('admin_inbox/'+myUid+'/messages').orderByChild('timestamp').on('value',function(s){var h='';inboxMessagesCache={};s.forEach(function(c){var m=c.val(),im=m.from==='user',ch='';inboxMessagesCache[c.key]=m;if(m.image)ch+='<img src="'+m.image+'" class="inbox-img" onclick="openImageViewer(this.src)">';if(m.image)ch+='<button onclick="saveInboxPhoto(\''+c.key+'\')" class="inbox-action-btn inbox-save-btn">💾 Save Photo</button>';if(m.fileData)ch+='<a href="'+m.fileData+'" download="'+(m.fileName||'file')+'" class="inbox-file">📎 '+(m.fileName||'File')+'</a>';if(m.text)ch+='<div style="color:#fff;font-size:14px;white-space:pre-wrap;">'+escapeHtml(m.text)+'</div>';h+='<div class="inbox-item" id="inbox-msg-'+c.key+'" style="'+(im?'text-align:right;background:#0a2a3a;':'text-align:left;background:#1a1a2e;')+'">';h+=ch;h+='<div class="inbox-meta"><span>'+(im?'You':'Admin')+'</span><span>'+new Date(m.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</span></div>';h+='<div class="inbox-actions-row"><button onclick="deleteInboxMsg(\''+c.key+'\')" class="inbox-action-btn inbox-delete-btn">🗑️ Delete</button></div>';h+='</div>'});document.getElementById('inboxMessages').innerHTML=h||'<div style="text-align:center;color:#555;padding:20px;">No messages yet</div>';document.getElementById('inboxMessages').scrollTop=99999})}
 function deleteInboxMsg(msgKey){if(!db||!myUid||!msgKey)return;if(!confirm('Delete this message?'))return;var msgEl=document.getElementById('inbox-msg-'+msgKey);if(msgEl)msgEl.classList.add('deleting');db.ref('admin_inbox/'+myUid+'/messages/'+msgKey).remove(function(err){if(err){alert('Failed to delete message.');if(msgEl)msgEl.classList.remove('deleting')}})}
-function saveInboxPhoto(msgKey){var msg=inboxMessagesCache[msgKey];if(!msg||!msg.image){alert('No photo found to save.');return}try{var a=document.createElement('a');a.href=msg.image;a.download='inbox_photo_'+Date.Now()+'.jpg';a.style.display='none';document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a)},500)}catch(e){openImageViewer(msg.image);alert('Tap 💾 Save in the viewer to download the photo.')}}
+function saveInboxPhoto(msgKey){var msg=inboxMessagesCache[msgKey];if(!msg||!msg.image){alert('No photo found to save.');return}try{var a=document.createElement('a');a.href=msg.image;a.download='inbox_photo_'+Date.now()+'.jpg';a.style.display='none';document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a)},500)}catch(e){openImageViewer(msg.image);alert('Tap 💾 Save in the viewer to download the photo.')}}
 window.handleInboxFileUpload=function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var im=f.type.startsWith('image/'),r=new FileReader();r.onload=function(ev){if(im){var img=new Image();img.onload=function(){var c=document.createElement('canvas'),w=600,h=600,iw=img.width,ih=img.height;if(iw>w){ih*=w/iw;iw=w}if(ih>h){iw*=h/ih;ih=h}c.width=Math.round(iw);c.height=Math.round(ih);c.getContext('2d').drawImage(img,0,0,c.width,c.height);inboxFileData=c.toDataURL('image/jpeg',0.5);inboxFileName=f.name;document.getElementById('inboxFilePreview').style.display='block';document.getElementById('inboxFileName').innerText='📷 '+f.name};img.src=ev.target.result}else{if(f.size>1048576){alert("Max 1MB.");e.target.value='';return}inboxFileData=ev.target.result;inboxFileName=f.name;document.getElementById('inboxFilePreview').style.display='block';document.getElementById('inboxFileName').innerText='📎 '+f.name}};r.readAsDataURL(f)};
 window.clearInboxFile=function(){inboxFileData=null;inboxFileName=null;document.getElementById('inboxFilePreview').style.display='none';document.getElementById('inboxFileInput').value=''};
-window.sendInboxMsg=function(){if(!db||!myUid)return;var i=document.getElementById('inboxMsgInput');var t=(i.value||'').trim();if(!t&&!inboxFileData)return;var md={from:'user',text:t,timestamp:Date.Now()};if(inboxFileData){if(inboxFileData.includes('image/'))md.image=inboxFileData;else{md.fileData=inboxFileData;md.fileName=inboxFileName}}db.ref('admin_inbox/'+myUid+'/messages').push(md,function(e){if(!e){i.value='';window.clearInboxFile()}})};
+window.sendInboxMsg=function(){if(!db||!myUid)return;var i=document.getElementById('inboxMsgInput');var t=(i.value||'').trim();if(!t&&!inboxFileData)return;var md={from:'user',text:t,timestamp:Date.now()};if(inboxFileData){if(inboxFileData.includes('image/'))md.image=inboxFileData;else{md.fileData=inboxFileData;md.fileName=inboxFileName}}db.ref('admin_inbox/'+myUid+'/messages').push(md,function(e){if(!e){i.value='';window.clearInboxFile()}})};
 function setupInboxNotif(){if(!db||!myUid)return;db.ref('admin_inbox/'+myUid+'/messages').orderByChild('timestamp').limitToLast(1).on('value',function(s){s.forEach(function(c){if(c.val().from==='admin'){var ip=document.getElementById('inboxPage');if(ip&&!ip.classList.contains('active')){var d=document.getElementById('inboxNotifDot');if(d)d.style.display='inline-block'}}})})}
 
 document.addEventListener('DOMContentLoaded',function(){
+    // Initialize Human Gates
     setupSlider('gateSliderTrack', 'gateSliderHandle', 'gateSliderProgress', 'gateSliderText', function() {
         var gate = document.getElementById('appGate');
         setTimeout(function() {
@@ -907,24 +854,20 @@ document.addEventListener('DOMContentLoaded',function(){
     var lb=document.getElementById("loginBtn");if(lb)lb.addEventListener('click',function(e){e.preventDefault();register()});
     var ui=document.getElementById("usernameInput");if(ui){ui.addEventListener('keypress',function(e){if(e.key==='Enter'){e.preventDefault();register()}});setTimeout(function(){ui.focus();},300)}
     var pi=document.getElementById("phoneInput");if(pi)pi.addEventListener('input',function(e){this.value=this.value.replace(/[^0-9]/g,'')});
-    var el;el=document.getElementById("navProfile");if(el)el.onclick=function(){showPage('profile')};el=document.getElementById("navWallet");if(el)el.onclick=function(){showPage('wallet')};el=document.getElementById("navChat");if(el)el.onclick=function(){showPage('chat')};el=document.getElementById("navPlay");if(el)el.onclick=function(){showPage('play')};el=document.getElementById("navInbox");if(el)el.onclick=function(){showPage('inbox')};
+    var el;el=document.getElementById("navProfile");if(el)el.onclick=function(){showPage('profile')};el=document.getElementById("navWallet");if(el)el.onclick=function(){showPage('wallet')};el=document.getElementById("navPlay");if(el)el.onclick=function(){showPage('play')};el=document.getElementById("navInbox");if(el)el.onclick=function(){showPage('inbox')};
     try{var u=localStorage.getItem("user");if(u){myUid=u;document.getElementById("loginPage").classList.remove("active");document.getElementById("mainNav").style.display="flex";document.getElementById('waFloatBtn').style.display='flex';showPage('profile');if(db)lockPaymentMethod(localStorage.getItem("userPhone")||'',localStorage.getItem("network")||'');initGameListeners();setupInboxNotif();checkVpn();}}catch(e){}
     
+    // Start loading community stats immediately
     loadCommunityStats();
 });
 </script>
 
 <!-- ===== CHAT & VOICE SYSTEM ===== -->
 <script>
-(function(){var chatCurrentWith=null;var chatListenerRef=null;var replyToMsg=null;var chatUsersCache=[];var chatMessagesData=[];var chatOnlineListeners=[];var mediaRecorder=null;var audioChunks=[];var isRecording=false;var recordingTimer=null;var recordingSeconds=0;function setOnlineStatus(online){if(!db||!myUid)return;var ref=db.ref('online_status/'+myUid);if(online){ref.set({online:true,lastSeen:Date.Now()});ref.onDisconnect().set({online:false,lastSeen:Date.Now()})}else{ref.set({online:false,lastSeen:Date.Now()})}}function getChatId(uid1,uid2){return uid1<uid2?uid1+'_'+uid2:uid2+'_'+uid1}function escapeHtml(text){var d=document.createElement('div');d.textContent=text;return d.innerHTML}function showChatPage(){var pages=document.querySelectorAll('.page');for(var i=0;i<pages.length;i++){pages[i].classList.remove('active');pages[i].style.display=''}document.getElementById('chatPage').classList.add('active');var btns=document.querySelectorAll('.nav-btn');for(var j=0;j<btns.length;j++)btns[j].classList.remove('active');if(btns[2])btns[2].classList.add('active');document.getElementById('mainNav').style.display='flex';document.getElementById('waFloatBtn').style.display='flex';loadChatUsers()}function loadChatUsers(){if(!db||!myUid)return;db.ref('leaderboard_all').once('value',function(snap){chatUsersCache=[];snap.forEach(function(child){if(child.key!==myUid)chatUsersCache.push({uid:child.key,displayName:(child.val()||{}).displayName||child.key})});renderChatUsers(chatUsersCache);listenAllOnlineStatus();loadAllLastMessages();loadAllUnreadCounts()})}function listenAllOnlineStatus(){chatOnlineListeners.forEach(function(r){r.off()});chatOnlineListeners=[];chatUsersCache.forEach(function(u){var ref=db.ref('online_status/'+u.uid);ref.on('value',function(sSnap){var dotEl=document.getElementById('cdot_'+u.uid);var sd=sSnap.val();if(dotEl){if(sd&&sd.online)dotEl.classList.add('on');else dotEl.classList.remove('on')}});chatOnlineListeners.push(ref)})}function loadAllLastMessages(){chatUsersCache.forEach(function(u){var chatId=getChatId(myUid,u.uid);db.ref('chats/'+chatId+'/messages').orderByChild('timestamp').limitToLast(1).once('value',function(snap){snap.forEach(function(child){var msg=child.val();var el=document.getElementById('lastmsg_'+u.uid);if(el)el.innerText=(msg.from===myUid?'You: ':'')+(msg.image?'📷':(msg.audio?'🎤':(msg.text||'')))})})})}function loadAllUnreadCounts(){chatUsersCache.forEach(function(u){var chatId=getChatId(myUid,u.uid);db.ref('chats/'+chatId+'/messages').orderByChild('read').equalTo(false).once('value',function(snap){var count=0;snap.forEach(function(c){if(c.val().from!==myUid)count++});var badge=document.getElementById('unread_'+u.uid);if(badge){if(count>0){badge.style.display='flex';badge.innerText=count}else badge.style.display='none'}})})}function renderChatUsers(users){var el=document.getElementById('chatUserList');if(!el)return;if(!users.length){el.innerHTML='<div style="padding:30px;color:#555">No users yet</div>';return}var html='';users.forEach(function(u){html+='<div class="chat-user-row" onclick="window._openChatWith(\''+u.uid+'\',\''+u.displayName+'\')" style="display:flex;align-items:center;gap:12px;padding:12px 8px;border-bottom:1px solid #1a1a1a">';html+='<div class="chat-avatar">'+escapeHtml(u.displayName[0])+'<span id="cdot_'+u.uid+'" class="chat-online-dot"></span></div>';html+='<div style="flex:1;text-align:left;min-width:0"><div style="font-weight:bold;color:#fff;font-size:14px">'+escapeHtml(u.displayName)+'</div><div id="lastmsg_'+u.uid+'" style="font-size:12px;color:#888;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Tap to chat</div></div>';html+='<div id="unread_'+u.uid+'" class="chat-unread-badge">0</div>';html+='</div>'});el.innerHTML=html}window.filterChatUsers=function(){var q=(document.getElementById('chatSearchInput').value||'').toLowerCase();renderChatUsers(chatUsersCache.filter(function(u){return u.displayName.toLowerCase().indexOf(q)>=0}));listenAllOnlineStatus()};window._openChatWith=function(uid,displayName){chatCurrentWith=uid;document.getElementById('chatConvName').innerText=displayName;document.getElementById('chatConvAvatar').innerText=displayName[0];cancelReply();var pages=document.querySelectorAll('.page');for(var i=0;i<pages.length;i++){pages[i].classList.remove('active');pages[i].style.display=''}document.getElementById('chatConvPage').classList.add('active');document.getElementById('mainNav').style.display='none';document.getElementById('waFloatBtn').style.display='none';listenForChatMessages(uid)};window.backToChatList=function(){if(chatListenerRef&&db)db.ref('chats/'+chatListenerRef+'/messages').off();chatCurrentWith=null;showPage('chat')};function listenForChatMessages(uid){var chatId=getChatId(myUid,uid);if(chatListenerRef&&db)db.ref('chats/'+chatListenerRef+'/messages').off();chatListenerRef=chatId;db.ref('chats/'+chatId+'/messages').orderByChild('timestamp').on('value',function(snap){chatMessagesData=[];snap.forEach(function(c){var m=c.val();m._id=c.key;chatMessagesData.push(m)});renderChatMessages(chatMessagesData);markChatAsRead(chatId,chatMessagesData)})}function renderChatMessages(messages){var container=document.getElementById('chatMessages');if(!container)return;var html='';var prevDate='';var me=String(myUid||'').trim();for(var idx=0;idx<messages.length;idx++){var msg=messages[idx];var fromId=String(msg.from||'').trim();var isMine=fromId===me;var dateStr=new Date(msg.timestamp).toLocaleDateString();if(dateStr!==prevDate){html+='<div style="text-align:center;margin:14px 0;font-size:11px;color:#999"><span style="background:#222;padding:3px 14px;border-radius:10px;display:inline-block">'+dateStr+'</span></div>';prevDate=dateStr}var tickHtml=isMine?(msg.read?' <span style="color:#00ffcc">✓✓</span>':' <span style="color:#777">✓✓</span>'):'';var replyHtml='';if(msg.replyTo){replyHtml='<div style="background:rgba(255,255,255,0.08);padding:4px 8px;border-radius:5px;border-left:3px solid #00ffcc;margin-bottom:6px;font-size:11px;color:#ccc">'+escapeHtml(msg.replyTo.text||'📷')+'</div>'}var imageHtml='';if(msg.image){imageHtml='<img src="'+msg.image+'" style="max-width:220px;max-height:220px;border-radius:10px;margin-bottom:6px;display:block;cursor:pointer;border:2px solid #333" onclick="openImageViewer(this.src)">'}var audioHtml='';if(msg.audio){audioHtml='<audio controls preload='none' style="width:200px;height:36px;margin-top:5px" src="'+msg.audio+'"></audio>'}var rowStyle='display:flex!important;visibility:visible!important;opacity:1!important;margin:8px 0;align-items:flex-end;gap:6px;width:100%;padding:0 6px;box-sizing:border-box;'+(isMine?'justify-content:flex-end;':'justify-content:flex-start;');var bubbleStyle='padding:10px 14px;max-width:78%;min-width:60px;min-height:28px;word-wrap:break-word;border-radius:16px;box-sizing:border-box;'+(isMine?'background-color:#005c4b;background:linear-gradient(135deg,#005c4b,#00786a);border:1px solid #00ffcc;color:#fff;border-bottom-right-radius:4px;':'background-color:#2a2f45;background:linear-gradient(135deg,#2a2f45,#32395e);border:1px solid #4a5568;color:#fff;border-bottom-left-radius:4px;');var senderLabel=isMine?'<div style="font-size:10px;color:#7fffd4;margin-bottom:3px;font-weight:bold">You</div>':'<div style="font-size:10px;color:#a0b4ff;margin-bottom:3px;font-weight:bold">'+escapeHtml((msg.from||'User').substring(0,12))+'</div>';html+='<div style="'+rowStyle+'">';if(!isMine)html+='<button style="font-size:14px;padding:4px;background:transparent;border:none;cursor:pointer;opacity:0.5;color:#888" onclick="window._setReplyByIndex('+idx+')">↩</button>';html+='<div style="'+bubbleStyle+'">';html+=senderLabel;html+=replyHtml;html+=imageHtml;html+=audioHtml;if(msg.text)html+='<div style="color:#ffffff!important;font-size:14px;white-space:pre-wrap;line-height:1.4">'+escapeHtml(msg.text)+'</div>';html+='<div style="font-size:10px;color:rgba(255,255,255,0.6);margin-top:5px;text-align:right">'+new Date(msg.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+tickHtml+'</div>';html+='</div>';if(isMine){html+='<button style="font-size:14px;padding:4px;background:transparent;border:none;cursor:pointer;opacity:0.5;color:#888" onclick="window._setReplyByIndex('+idx+')">↩</button>';html+='<button style="font-size:14px;padding:4px;background:transparent;border:none;cursor:pointer;opacity:0.6;color:#ff7b7b" onclick="window._deleteMsg(\''+msg._id+'\')" title="Delete">🗑</button>'}html+='</div>'}container.innerHTML=html;container.scrollTop=container.scrollHeight}function markChatAsRead(chatId,msgs){if(!db)return;msgs.forEach(function(m){if(m.from!==myUid&&!m.read)db.ref('chats/'+chatId+'/messages/'+m._id).update({read:true})})}window.sendChatMsg=function(){if(!db||!chatCurrentWith||!myUid){alert('Chat not ready.');return}var input=document.getElementById('chatMsgInput');var text=(input.value||'').trim();if(!text)return;var msgData={from:myUid,text:text,timestamp:Date.Now(),read:false};if(replyToMsg){msgData.replyTo={id:replyToMsg.id,text:replyToMsg.text};cancelReply()}var chatId=getChatId(myUid,chatCurrentWith);db.ref('chats/'+chatId+'/messages').push(msgData,function(err){if(err)alert('Message failed: '+err.message);else input.value=''})};window._setReplyByIndex=function(idx){var msg=chatMessagesData[idx];if(!msg)return;replyToMsg={id:msg._id,text:msg.text||(msg.image?'📷':(msg.audio?'🎤':''))};document.getElementById('replyPreview').style.display='block';document.getElementById('replyPreviewText').innerText=replyToMsg.text;document.getElementById('chatMsgInput').focus()};function cancelReply(){replyToMsg=null;document.getElementById('replyPreview').style.display='none'}window.cancelReply=cancelReply;window.handleChatFileUpload=function(e){var file=e.target.files&&e.target.files[0];if(!file||!db||!chatCurrentWith||!myUid)return;var reader=new FileReader();reader.onload=function(ev){var img=new Image();img.onload=function(){var c=document.createElement('canvas');var w=600,h=600,iw=img.width,ih=img.height;if(iw>w){ih*=w/iw;iw=w}if(ih>h){iw*=h/ih;ih=h}c.width=Math.round(iw);c.height=Math.round(ih);c.getContext('2d').drawImage(img,0,0,c.width,c.height);var imageData=c.toDataURL('image/jpeg',0.5);var chatId=getChatId(myUid,chatCurrentWith);db.ref('chats/'+chatId+'/messages').push({from:myUid,text:'',image:imageData,timestamp:Date.Now(),read:false},function(err){if(err)alert('Image send failed: '+err.message)})};img.src=ev.target.result};reader.readAsDataURL(file);e.target.value=''};window._deleteMsg=function(msgId){if(!chatListenerRef||!db)return;if(confirm('Delete?'))db.ref('chats/'+chatListenerRef+'/messages/'+msgId).remove()};window.clearChat=function(){if(!chatCurrentWith||!db)return;if(confirm('Delete ALL messages?'))db.ref('chats/'+getChatId(myUid,chatCurrentWith)+'/messages').remove()};window.toggleVoiceNote=function(){if(isRecording)stopVoiceRecording();else startVoiceRecording()};function startVoiceRecording(){navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){audioChunks=[];mediaRecorder=new MediaRecorder(stream);mediaRecorder.ondataavailable=function(e){audioChunks.push(e.data)};mediaRecorder.onstop=function(){stream.getTracks().forEach(function(t){t.stop()});var blob=new Blob(audioChunks,{type:'audio/webm'});var reader=new FileReader();reader.onload=function(){db.ref('chats/'+getChatId(myUid,chatCurrentWith)+'/messages').push({from:myUid,text:'',audio:reader.result,timestamp:Date.Now(),read:false})};reader.readAsDataURL(blob)};mediaRecorder.start();isRecording=true;document.getElementById('voiceNoteBtn').style.background='#ff6b6b';document.getElementById('voiceNoteBtn').innerText='⏹';document.getElementById('recordingStatus').style.display='block';recordingTimer=setInterval(function(){recordingSeconds++;if(recordingSeconds>=60)stopVoiceRecording()},1000)}).catch(function(){alert('Microphone access denied.')})}function stopVoiceRecording(){if(mediaRecorder&&mediaRecorder.state!=='inactive')mediaRecorder.stop();isRecording=false;clearInterval(recordingTimer);recordingSeconds=0;document.getElementById('voiceNoteBtn').style.background='#1a1a1a';document.getElementById('voiceNoteBtn').innerText='🎤';document.getElementById('recordingStatus').style.display='none'}if(document.getElementById('navChat'))document.getElementById('navChat').addEventListener('click',function(e){e.preventDefault();showChatPage()});function initChatOnline(){if(myUid&&db){setOnlineStatus(true);setInterval(function(){if(myUid&&db)setOnlineStatus(true)},30000)}}window.addEventListener('beforeunload',function(){setOnlineStatus(false)});setTimeout(function(){if(myUid&&db)initChatOnline()},500);var _lastUid=null;setInterval(function(){if(myUid!==_lastUid){_lastUid=myUid;if(myUid&&db)initChatOnline()}},500);
-
-// Expose loadChatUsers globally so the main navigation can trigger it when the Chat tab is clicked
-window.loadChatUsers = loadChatUsers;
-
-})();
+(function(){var chatCurrentWith=null;var chatListenerRef=null;var replyToMsg=null;var chatUsersCache=[];var chatMessagesData=[];var chatOnlineListeners=[];var mediaRecorder=null;var audioChunks=[];var isRecording=false;var recordingTimer=null;var recordingSeconds=0;function setOnlineStatus(online){if(!db||!myUid)return;var ref=db.ref('online_status/'+myUid);if(online){ref.set({online:true,lastSeen:Date.now()});ref.onDisconnect().set({online:false,lastSeen:Date.now()})}else{ref.set({online:false,lastSeen:Date.now()})}}function getChatId(uid1,uid2){return uid1<uid2?uid1+'_'+uid2:uid2+'_'+uid1}function escapeHtml(text){var d=document.createElement('div');d.textContent=text;return d.innerHTML}function showChatPage(){var pages=document.querySelectorAll('.page');for(var i=0;i<pages.length;i++){pages[i].classList.remove('active');pages[i].style.display=''}document.getElementById('chatPage').classList.add('active');var btns=document.querySelectorAll('.nav-btn');for(var j=0;j<btns.length;j++)btns[j].classList.remove('active');if(btns[2])btns[2].classList.add('active');document.getElementById('mainNav').style.display='flex';document.getElementById('waFloatBtn').style.display='flex';loadChatUsers()}function loadChatUsers(){if(!db||!myUid)return;db.ref('leaderboard_all').once('value',function(snap){chatUsersCache=[];snap.forEach(function(child){if(child.key!==myUid)chatUsersCache.push({uid:child.key,displayName:(child.val()||{}).displayName||child.key})});renderChatUsers(chatUsersCache);listenAllOnlineStatus();loadAllLastMessages();loadAllUnreadCounts()})}function listenAllOnlineStatus(){chatOnlineListeners.forEach(function(r){r.off()});chatOnlineListeners=[];chatUsersCache.forEach(function(u){var ref=db.ref('online_status/'+u.uid);ref.on('value',function(sSnap){var dotEl=document.getElementById('cdot_'+u.uid);var sd=sSnap.val();if(dotEl){if(sd&&sd.online)dotEl.classList.add('on');else dotEl.classList.remove('on')}});chatOnlineListeners.push(ref)})}function loadAllLastMessages(){chatUsersCache.forEach(function(u){var chatId=getChatId(myUid,u.uid);db.ref('chats/'+chatId+'/messages').orderByChild('timestamp').limitToLast(1).once('value',function(snap){snap.forEach(function(child){var msg=child.val();var el=document.getElementById('lastmsg_'+u.uid);if(el)el.innerText=(msg.from===myUid?'You: ':'')+(msg.image?'📷':(msg.audio?'🎤':(msg.text||'')))})})})}function loadAllUnreadCounts(){chatUsersCache.forEach(function(u){var chatId=getChatId(myUid,u.uid);db.ref('chats/'+chatId+'/messages').orderByChild('read').equalTo(false).once('value',function(snap){var count=0;snap.forEach(function(c){if(c.val().from!==myUid)count++});var badge=document.getElementById('unread_'+u.uid);if(badge){if(count>0){badge.style.display='flex';badge.innerText=count}else badge.style.display='none'}})})}function renderChatUsers(users){var el=document.getElementById('chatUserList');if(!el)return;if(!users.length){el.innerHTML='<div style="padding:30px;color:#555">No users yet</div>';return}var html='';users.forEach(function(u){html+='<div class="chat-user-row" onclick="window._openChatWith(\''+u.uid+'\',\''+u.displayName+'\')" style="display:flex;align-items:center;gap:12px;padding:12px 8px;border-bottom:1px solid #1a1a1a">';html+='<div class="chat-avatar">'+escapeHtml(u.displayName[0])+'<span id="cdot_'+u.uid+'" class="chat-online-dot"></span></div>';html+='<div style="flex:1;text-align:left;min-width:0"><div style="font-weight:bold;color:#fff;font-size:14px">'+escapeHtml(u.displayName)+'</div><div id="lastmsg_'+u.uid+'" style="font-size:12px;color:#888;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Tap to chat</div></div>';html+='<div id="unread_'+u.uid+'" class="chat-unread-badge">0</div>';html+='</div>'});el.innerHTML=html}window.filterChatUsers=function(){var q=(document.getElementById('chatSearchInput').value||'').toLowerCase();renderChatUsers(chatUsersCache.filter(function(u){return u.displayName.toLowerCase().indexOf(q)>=0}));listenAllOnlineStatus()};window._openChatWith=function(uid,displayName){chatCurrentWith=uid;document.getElementById('chatConvName').innerText=displayName;document.getElementById('chatConvAvatar').innerText=displayName[0];cancelReply();var pages=document.querySelectorAll('.page');for(var i=0;i<pages.length;i++){pages[i].classList.remove('active');pages[i].style.display=''}document.getElementById('chatConvPage').classList.add('active');document.getElementById('mainNav').style.display='none';document.getElementById('waFloatBtn').style.display='none';listenForChatMessages(uid)};window.backToChatList=function(){if(chatListenerRef&&db)db.ref('chats/'+chatListenerRef+'/messages').off();chatCurrentWith=null;showChatPage()};function listenForChatMessages(uid){var chatId=getChatId(myUid,uid);if(chatListenerRef&&db)db.ref('chats/'+chatListenerRef+'/messages').off();chatListenerRef=chatId;db.ref('chats/'+chatId+'/messages').orderByChild('timestamp').on('value',function(snap){chatMessagesData=[];snap.forEach(function(c){var m=c.val();m._id=c.key;chatMessagesData.push(m)});renderChatMessages(chatMessagesData);markChatAsRead(chatId,chatMessagesData)})}function renderChatMessages(messages){var container=document.getElementById('chatMessages');if(!container)return;var html='';var prevDate='';var me=String(myUid||'').trim();for(var idx=0;idx<messages.length;idx++){var msg=messages[idx];var fromId=String(msg.from||'').trim();var isMine=fromId===me;var dateStr=new Date(msg.timestamp).toLocaleDateString();if(dateStr!==prevDate){html+='<div style="text-align:center;margin:14px 0;font-size:11px;color:#999"><span style="background:#222;padding:3px 14px;border-radius:10px;display:inline-block">'+dateStr+'</span></div>';prevDate=dateStr}var tickHtml=isMine?(msg.read?' <span style="color:#00ffcc">✓✓</span>':' <span style="color:#777">✓✓</span>'):'';var replyHtml='';if(msg.replyTo){replyHtml='<div style="background:rgba(255,255,255,0.08);padding:4px 8px;border-radius:5px;border-left:3px solid #00ffcc;margin-bottom:6px;font-size:11px;color:#ccc">'+escapeHtml(msg.replyTo.text||'📷')+'</div>'}var imageHtml='';if(msg.image){imageHtml='<img src="'+msg.image+'" style="max-width:220px;max-height:220px;border-radius:10px;margin-bottom:6px;display:block;cursor:pointer;border:2px solid #333" onclick="openImageViewer(this.src)">'}var audioHtml='';if(msg.audio){audioHtml='<audio controls preload='none' style="width:200px;height:36px;margin-top:5px" src="'+msg.audio+'"></audio>'}var rowStyle='display:flex!important;visibility:visible!important;opacity:1!important;margin:8px 0;align-items:flex-end;gap:6px;width:100%;padding:0 6px;box-sizing:border-box;'+(isMine?'justify-content:flex-end;':'justify-content:flex-start;');var bubbleStyle='padding:10px 14px;max-width:78%;min-width:60px;min-height:28px;word-wrap:break-word;border-radius:16px;box-sizing:border-box;'+(isMine?'background-color:#005c4b;background:linear-gradient(135deg,#005c4b,#00786a);border:1px solid #00ffcc;color:#fff;border-bottom-right-radius:4px;':'background-color:#2a2f45;background:linear-gradient(135deg,#2a2f45,#32395e);border:1px solid #4a5568;color:#fff;border-bottom-left-radius:4px;');var senderLabel=isMine?'<div style="font-size:10px;color:#7fffd4;margin-bottom:3px;font-weight:bold">You</div>':'<div style="font-size:10px;color:#a0b4ff;margin-bottom:3px;font-weight:bold">'+escapeHtml((msg.from||'User').substring(0,12))+'</div>';html+='<div style="'+rowStyle+'">';if(!isMine)html+='<button style="font-size:14px;padding:4px;background:transparent;border:none;cursor:pointer;opacity:0.5;color:#888" onclick="window._setReplyByIndex('+idx+')">↩</button>';html+='<div style="'+bubbleStyle+'">';html+=senderLabel;html+=replyHtml;html+=imageHtml;html+=audioHtml;if(msg.text)html+='<div style="color:#ffffff!important;font-size:14px;white-space:pre-wrap;line-height:1.4">'+escapeHtml(msg.text)+'</div>';html+='<div style="font-size:10px;color:rgba(255,255,255,0.6);margin-top:5px;text-align:right">'+new Date(msg.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+tickHtml+'</div>';html+='</div>';if(isMine){html+='<button style="font-size:14px;padding:4px;background:transparent;border:none;cursor:pointer;opacity:0.5;color:#888" onclick="window._setReplyByIndex('+idx+')">↩</button>';html+='<button style="font-size:14px;padding:4px;background:transparent;border:none;cursor:pointer;opacity:0.6;color:#ff7b7b" onclick="window._deleteMsg(\''+msg._id+'\')" title="Delete">🗑</button>'}html+='</div>'}container.innerHTML=html;container.scrollTop=container.scrollHeight}function markChatAsRead(chatId,msgs){if(!db)return;msgs.forEach(function(m){if(m.from!==myUid&&!m.read)db.ref('chats/'+chatId+'/messages/'+m._id).update({read:true})})}window.sendChatMsg=function(){if(!db||!chatCurrentWith||!myUid){alert('Chat not ready.');return}var input=document.getElementById('chatMsgInput');var text=(input.value||'').trim();if(!text)return;var msgData={from:myUid,text:text,timestamp:Date.now(),read:false};if(replyToMsg){msgData.replyTo={id:replyToMsg.id,text:replyToMsg.text};cancelReply()}var chatId=getChatId(myUid,chatCurrentWith);db.ref('chats/'+chatId+'/messages').push(msgData,function(err){if(err)alert('Message failed: '+err.message);else input.value=''})};window._setReplyByIndex=function(idx){var msg=chatMessagesData[idx];if(!msg)return;replyToMsg={id:msg._id,text:msg.text||(msg.image?'📷':(msg.audio?'🎤':''))};document.getElementById('replyPreview').style.display='block';document.getElementById('replyPreviewText').innerText=replyToMsg.text;document.getElementById('chatMsgInput').focus()};function cancelReply(){replyToMsg=null;document.getElementById('replyPreview').style.display='none'}window.cancelReply=cancelReply;window.handleChatFileUpload=function(e){var file=e.target.files&&e.target.files[0];if(!file||!db||!chatCurrentWith||!myUid)return;var reader=new FileReader();reader.onload=function(ev){var img=new Image();img.onload=function(){var c=document.createElement('canvas');var w=600,h=600,iw=img.width,ih=img.height;if(iw>w){ih*=w/iw;iw=w}if(ih>h){iw*=h/ih;ih=h}c.width=Math.round(iw);c.height=Math.round(ih);c.getContext('2d').drawImage(img,0,0,c.width,c.height);var imageData=c.toDataURL('image/jpeg',0.5);var chatId=getChatId(myUid,chatCurrentWith);db.ref('chats/'+chatId+'/messages').push({from:myUid,text:'',image:imageData,timestamp:Date.now(),read:false},function(err){if(err)alert('Image send failed: '+err.message)})};img.src=ev.target.result};reader.readAsDataURL(file);e.target.value=''};window._deleteMsg=function(msgId){if(!chatListenerRef||!db)return;if(confirm('Delete?'))db.ref('chats/'+chatListenerRef+'/messages/'+msgId).remove()};window.clearChat=function(){if(!chatCurrentWith||!db)return;if(confirm('Delete ALL messages?'))db.ref('chats/'+getChatId(myUid,chatCurrentWith)+'/messages').remove()};window.toggleVoiceNote=function(){if(isRecording)stopVoiceRecording();else startVoiceRecording()};function startVoiceRecording(){navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){audioChunks=[];mediaRecorder=new MediaRecorder(stream);mediaRecorder.ondataavailable=function(e){audioChunks.push(e.data)};mediaRecorder.onstop=function(){stream.getTracks().forEach(function(t){t.stop()});var blob=new Blob(audioChunks,{type:'audio/webm'});var reader=new FileReader();reader.onload=function(){db.ref('chats/'+getChatId(myUid,chatCurrentWith)+'/messages').push({from:myUid,text:'',audio:reader.result,timestamp:Date.now(),read:false})};reader.readAsDataURL(blob)};mediaRecorder.start();isRecording=true;document.getElementById('voiceNoteBtn').style.background='#ff6b6b';document.getElementById('voiceNoteBtn').innerText='⏹';document.getElementById('recordingStatus').style.display='block';recordingTimer=setInterval(function(){recordingSeconds++;if(recordingSeconds>=60)stopVoiceRecording()},1000)}).catch(function(){alert('Microphone access denied.')})}function stopVoiceRecording(){if(mediaRecorder&&mediaRecorder.state!=='inactive')mediaRecorder.stop();isRecording=false;clearInterval(recordingTimer);recordingSeconds=0;document.getElementById('voiceNoteBtn').style.background='#1a1a1a';document.getElementById('voiceNoteBtn').innerText='🎤';document.getElementById('recordingStatus').style.display='none'}if(document.getElementById('navChat'))document.getElementById('navChat').addEventListener('click',function(e){e.preventDefault();showChatPage()});function initChatOnline(){if(myUid&&db){setOnlineStatus(true);setInterval(function(){if(myUid&&db)setOnlineStatus(true)},30000)}}window.addEventListener('beforeunload',function(){setOnlineStatus(false)});setTimeout(function(){if(myUid&&db)initChatOnline()},500);var _lastUid=null;setInterval(function(){if(myUid!==_lastUid){_lastUid=myUid;if(myUid&&db)initChatOnline()}},500)})();
 </script>
 
-<!-- ===== BULLETPROOF APP INSTALL GATE DETECTION (NATIVINE SUPPORT) ===== -->
+<!-- ===== BULLETPROOF APP INSTALL GATE DETECTION ===== -->
 <script>
 (function() {
   var gateDismissed = false;
@@ -948,27 +891,17 @@ window.loadChatUsers = loadChatUsers;
 
   function isNativeApp() {
     try {
-      var loc = window.location || {};
-      // 1. If the URL contains ?app=1, we know it's inside the Nativine App!
-      if (loc.href && (loc.href.indexOf('?app=1') !== -1 || loc.href.indexOf('&app=1') !== -1)) return true;
-
-      // 2. Check for standard native app bridges (Median, GoNative, etc.)
       if (window.MedianNative) return true;
-      if (window.__MEDIAN__) return true;
-      if (window.__goNativeBridge) return true;
-      if (typeof median !== 'undefined' && typeof median.ready === 'function') return true;
-      
       var ua = (navigator.userAgent || '').toLowerCase();
-      // 3. Check if the app builder specifically injected our custom string "MadaNativeApp"
-      if (ua.indexOf('madanativeapp') !== -1) return true;
       if (ua.indexOf('median') !== -1) return true;
-      
-      // 4. Fallback for standard Android WebView
+      if (typeof median !== 'undefined' && typeof median.ready === 'function') return true;
       var isAndroid = ua.indexOf('android') !== -1;
       var isWV = ua.indexOf('wv') !== -1 || ua.indexOf('webview') !== -1;
       var isRegularChrome = ua.indexOf('chrome') !== -1 && ua.indexOf('wv') === -1;
       if (isAndroid && isWV && !isRegularChrome) return true;
-      
+      if (window.__MEDIAN__) return true;
+      if (window.__goNativeBridge) return true;
+      var loc = window.location || {};
       if (loc.protocol === 'file:') return true;
       if (loc.href && loc.href.indexOf('median://') === 0) return true;
     } catch(e) {}
@@ -1048,4 +981,4 @@ window.loadChatUsers = loadChatUsers;
 </script>
 
 </body>
-                                                                                     </html> 
+                                                                                                                                                                                                                                                                                                                                                                                                                                                     </html>
